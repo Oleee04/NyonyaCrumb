@@ -4,13 +4,13 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="card mb-4">
                 <form action="{{ route('backend.kategori.update', $edit->id) }}" method="post">
                     @method('put')
                     @csrf
                     <div class="card-body">
                         <h4 class="card-title"> {{$judul}} </h4>
-                        <div class="form-group">
+                        <div class="form-group mb-3">
                             <label>Nama Kategori</label>
                             <input type="text" name="nama_kategori" value="{{
     old('nama_kategori', $edit->nama_kategori) }}" class="form-control @error('nama_kategori')
@@ -22,7 +22,7 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="border-top">
+                    <div class="border-top pt-3">
                         <div class="card-body">
                             <button type="submit" class="btn btn-primary">Perbaharui</button>
                             <a href="{{ route('backend.kategori.index') }}">

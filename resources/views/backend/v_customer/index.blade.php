@@ -4,14 +4,14 @@
 <!-- Content Awal -->
 <div class="row">
     <div class="col-12">
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-body">
 
                 <h5 class="card-title">{{ $judul }}</h5>
                 <br>
 
                 <div class="table-responsive">
-                    <table id="zero_config" class="table table-striped table-bordered">
+                    <table id="zero_config" class="table table-hover table-bordered">
                         <thead>
                             <tr>
                                 <th>No</th>
@@ -39,7 +39,7 @@
                                             </button>
                                         </a>
 
-                                        <form method="POST" action="#" style="display: inline-block;">
+                                        <form method="POST" action="{{ route('backend.customer.destroy', $row->id) }}" style="display: inline-block;">
                                             @method('delete')
                                             @csrf
                                             <button type="submit" class="btn btn-danger btn-sm show_confirm" data-konf-delete="{{ $row->user->nama }}" title="Hapus Data">

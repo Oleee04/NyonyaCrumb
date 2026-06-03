@@ -13,7 +13,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        $user = User::orderBy('updated_at', 'desc')->get();
+        $user = User::whereIn('role', ['0', '1'])->orderBy('updated_at', 'desc')->get();
         return view('backend.v_user.index', [
             'judul' => 'Data User',
             'index' => $user
@@ -73,7 +73,7 @@ class UserController extends Controller
 
     public function edit(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::whereIn('role', ['0', '1'])->findOrFail($id);
         return view('backend.v_user.edit', [
             'judul' => 'Ubah User',
             'edit' => $user
@@ -82,7 +82,7 @@ class UserController extends Controller
 
     public function update(Request $request, string $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::whereIn('role', ['0', '1'])->findOrFail($id);
 
         $rules = [
             'nama' => 'required|max:255',
@@ -124,7 +124,7 @@ class UserController extends Controller
 
     public function destroy(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::whereIn('role', ['0', '1'])->findOrFail($id);
 
         if ($user->foto) {
             $oldImagePath = public_path('storage/img-user/') . $user->foto;
@@ -159,7 +159,8 @@ class UserController extends Controller
         $tanggalAwal = $request->input('tanggal_awal');
         $tanggalAkhir = $request->input('tanggal_akhir');
 
-        $user = User::whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
+        $user = User::whereIn('role', ['0', '1'])
+                    ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
                     ->orderBy('id', 'desc')
                     ->get();
 

@@ -9,9 +9,10 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\RajaOngkirController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\ElectreController;
  
 Route::get('/', function () { 
     // return view('welcome'); 
@@ -19,62 +20,74 @@ Route::get('/', function () {
 });
 
 
-Route::get('backend/beranda', [BerandaController::class, 'berandaBackend'])->name('backend.beranda')->middleware('auth'); 
- 
 Route::get('backend/login', [LoginController::class, 'loginBackend'])->name('backend.login'); 
 Route::post('backend/login', [LoginController::class, 'authenticateBackend'])->name('backend.login'); 
+Route::post('backend/register', [LoginController::class, 'registerBackend'])->name('backend.register'); 
 Route::post('backend/logout', [LoginController::class, 'logoutBackend'])->name('backend.logout'); 
 
-// Route untuk User 
-Route::resource('backend/user', UserController::class, ['as' => 'backend'])->middleware('auth'); 
-// Route untuk laporan user 
-    // Laporan User
+Route::middleware(['auth', 'is.admin'])->group(function () {
+    Route::get('backend/beranda', [BerandaController::class, 'berandaBackend'])->name('backend.beranda'); 
+   Route::get('/backend/electre', [ElectreController::class, 'index'])
+    ->name('backend.electre.index');
+
+Route::post('/backend/electre/hitung', [ElectreController::class, 'hitung'])
+    ->name('backend.electre.hitung');
+
+Route::get('/backend/electre/hasil', [ElectreController::class, 'hasil'])
+    ->name('backend.electre.hasil');
+
+// Optional biar kalau /backend/electre/hitung kebuka langsung tidak error
+Route::get('/backend/electre/hitung', function () {
+    return redirect()->route('backend.electre.index')
+        ->with('error', 'Silakan upload file Excel terlebih dahulu.');
+});
+    // Route untuk User 
+    Route::resource('backend/user', UserController::class, ['as' => 'backend']); 
+    // Route untuk laporan user 
     Route::get('backend/laporan/formuser', [UserController::class, 'formUser'])->name('backend.laporan.formuser');
     Route::post('backend/laporan/cetakuser', [UserController::class, 'cetakUser'])->name('backend.laporan.cetakuser');
 
     // Laporan Penjualan
-     Route::get('backend/laporan/formpenjualan', [UserController::class, 'formPenjualan'])->name('backend.laporan.formpenjualan');
+    Route::get('backend/laporan/formpenjualan', [UserController::class, 'formPenjualan'])->name('backend.laporan.formpenjualan');
     Route::post('backend/laporan/formpenjualan', [UserController::class, 'cetakPenjualan'])->name('backend.laporan.cetakpenjualan');
- 
-// Route untuk Kategori 
-Route::resource('backend/kategori', KategoriController::class, ['as' => 'backend'])->middleware('auth'); 
-Route::get('/pesanan/create', [UserController::class, 'create'])->name('backend.pesanan.create');
-Route::post('/pesanan/store', [UserController::class, 'store'])->name('backend.pesanan.store');
+    
+    // Route untuk Kategori 
+    Route::resource('backend/kategori', KategoriController::class, ['as' => 'backend']); 
+    Route::get('/pesanan/create', [UserController::class, 'create'])->name('backend.pesanan.create');
+    Route::post('/pesanan/store', [UserController::class, 'store'])->name('backend.pesanan.store');
 
-// Route untuk Pesanan Backend
-Route::get('backend/pesanan', [OrderController::class, 'index'])->name('backend.pesanan.index')->middleware('auth');
-Route::get('/pesanan/proses', [OrderController::class, 'statusProses'])->name('pesanan.proses')->middleware('auth');
-Route::get('/pesanan/selesai', [OrderController::class, 'statusSelesai'])->name('pesanan.selesai')->middleware('auth');
-Route::get('/backend/pesanan/{id}/detail', [OrderController::class, 'statusDetailAdmin'])
-    ->name('backend.v_pesanan.detail');
+    // Route untuk Pesanan Backend
+    Route::get('backend/pesanan', [OrderController::class, 'index'])->name('backend.pesanan.index');
+    Route::get('/pesanan/proses', [OrderController::class, 'statusProses'])->name('pesanan.proses');
+    Route::get('/pesanan/selesai', [OrderController::class, 'statusSelesai'])->name('pesanan.selesai');
+    Route::get('/backend/pesanan/{id}/detail', [OrderController::class, 'statusDetailAdmin'])
+        ->name('backend.v_pesanan.detail');
 
-Route::put('/pesanan/update/{id}', [OrderController::class, 'statusUpdate'])->name('pesanan.update')->middleware('auth');
-Route::get('/pesanan/invoice/{id}', [OrderController::class, 'invoiceBackend'])->name('pesanan.invoice')->middleware('auth');
+    Route::put('/pesanan/update/{id}', [OrderController::class, 'statusUpdate'])->name('pesanan.update');
+    Route::get('/pesanan/invoice/{id}', [OrderController::class, 'invoiceBackend'])->name('pesanan.invoice');
 
-// Route untuk Laporan Pesanan
-Route::get('backend/laporan/formproses', [OrderController::class, 'formOrderProses'])->name('backend.laporan.formproses')->middleware('auth');
-Route::post('backend/laporan/cetakproses', [OrderController::class, 'cetakOrderProses'])->name('backend.laporan.cetakproses')->middleware('auth');
-Route::get('backend/laporan/formselesai', [OrderController::class, 'formOrderSelesai'])->name('backend.laporan.formselesai')->middleware('auth');
-Route::post('backend/laporan/cetakselesai', [OrderController::class, 'cetakOrderSelesai'])->name('backend.laporan.cetakselesai')->middleware('auth');
+    // Route untuk Laporan Pesanan
+    Route::get('backend/laporan/formproses', [OrderController::class, 'formOrderProses'])->name('backend.laporan.formproses');
+    Route::post('backend/laporan/cetakproses', [OrderController::class, 'cetakOrderProses'])->name('backend.laporan.cetakproses');
+    Route::get('backend/laporan/formselesai', [OrderController::class, 'formOrderSelesai'])->name('backend.laporan.formselesai');
+    Route::post('backend/laporan/cetakselesai', [OrderController::class, 'cetakOrderSelesai'])->name('backend.laporan.cetakselesai');
 
-// Route untuk Produk 
-Route::resource('backend/produk', ProdukController::class, ['as' => 'backend'])->middleware('auth'); 
-// Route untuk menambahkan foto 
-Route::post('foto-produk/store', [ProdukController::class, 'storeFoto'])->name('backend.foto_produk.store')->middleware('auth'); 
-// Route untuk menghapus foto
-Route::delete('foto-produk/{id}', [ProdukController::class, 'destroyFoto'])->name('backend.foto_produk.destroy')->middleware('auth');
-// Route untuk laporan produk 
-Route::get('backend/laporan/formproduk', [ProdukController::class, 'formProduk'])->name('backend.laporan.formproduk')->middleware('auth'); 
-Route::post('backend/laporan/cetakproduk', [ProdukController::class, 'cetakProduk'])->name('backend.laporan.cetakproduk')->middleware('auth');
+    // Route untuk Produk 
+    Route::resource('backend/produk', ProdukController::class, ['as' => 'backend']); 
+    // Route untuk menambahkan foto 
+    Route::post('foto-produk/store', [ProdukController::class, 'storeFoto'])->name('backend.foto_produk.store'); 
+    // Route untuk menghapus foto
+    Route::delete('foto-produk/{id}', [ProdukController::class, 'destroyFoto'])->name('backend.foto_produk.destroy');
+    // Route untuk laporan produk 
+    Route::get('backend/laporan/formproduk', [ProdukController::class, 'formProduk'])->name('backend.laporan.formproduk'); 
+    Route::post('backend/laporan/cetakproduk', [ProdukController::class, 'cetakProduk'])->name('backend.laporan.cetakproduk');
 
-// Route untuk Customer 
-Route::resource('backend/customer', CustomerController::class, ['as' => 'backend'])->middleware('auth');
+    // Route untuk Customer 
+    Route::resource('backend/customer', CustomerController::class, ['as' => 'backend']);
+});
 
 // Frontend 
 Route::get('/beranda', [BerandaController::class, 'index'])->name('beranda');
-Route::get('/lokasi', function () {
-    return view('lokasi');
-})->name('lokasi');
 Route::get('/cara-pesan', function () {
     return view('cara-pesan');
 })->name('cara.pesan');
@@ -94,6 +107,21 @@ Route::get('/cart', [OrderController::class, 'viewCart'])->name('v_order.cart');
 //API Google 
 Route::get('/auth/redirect', [CustomerController::class, 'redirect'])->name('auth.redirect'); 
 Route::get('/auth/google/callback', [CustomerController::class, 'callback'])->name('auth.callback'); 
+
+// Frontend Auth Views
+Route::get('/auth/login', function () { return view('v_customer.login'); })->name('auth.login');
+Route::post('/auth/login', [CustomerController::class, 'loginSubmit'])->name('auth.login.submit');
+Route::get('/auth/register', function () { return view('v_customer.register'); })->name('auth.register');
+Route::post('/auth/register', [CustomerController::class, 'registerSubmit'])->name('auth.register.submit');
+
+// Password Reset Routes
+Route::get('/auth/forgot-password', [ForgotPasswordController::class, 'showForgotForm'])->name('auth.forgot-password.form');
+Route::post('/auth/forgot-password', [ForgotPasswordController::class, 'sendOtp'])->name('auth.forgot-password.send');
+Route::get('/auth/verify-otp', [ForgotPasswordController::class, 'showOtpForm'])->name('auth.verify-otp.form');
+Route::post('/auth/verify-otp', [ForgotPasswordController::class, 'verifyOtp'])->name('auth.verify-otp.submit');
+Route::get('/auth/reset-password', [ForgotPasswordController::class, 'showResetForm'])->name('auth.reset-password.form');
+Route::post('/auth/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('auth.reset-password.submit');
+
 // Logout 
 Route::post('/logout', [CustomerController::class, 'logout'])->name('logout');
 
@@ -125,6 +153,7 @@ Route::middleware('is.customer')->group(function () {
     
     // Route untuk payment
     Route::get('/order/selectpayment/{order_id}', [OrderController::class, 'selectPayment'])->name('order.selectpayment');
+    Route::get('/order/{order_id}/revert-checkout', [OrderController::class, 'revertCheckout'])->name('order.revert_checkout');
     Route::get('/order/pending', [OrderController::class, 'pending'])->name('order.pending');
     Route::get('/order/complete', [OrderController::class, 'complete'])->name('order.complete');
 

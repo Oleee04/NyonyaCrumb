@@ -23,14 +23,16 @@ class Order extends Model
         'ekspedisi',
         'noresi',
         'snap_token',
+        'stock_deducted',
     ];
 
     protected $casts = [
-        'total_harga' => 'float',
-        'biaya_ongkir' => 'float',
-        'order_date' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'total_harga'    => 'float',
+        'biaya_ongkir'   => 'float',
+        'order_date'     => 'datetime',
+        'created_at'     => 'datetime',
+        'updated_at'     => 'datetime',
+        'stock_deducted' => 'boolean',
     ];
 
     /**

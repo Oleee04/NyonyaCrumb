@@ -15,6 +15,19 @@ class ReviewController extends Controller
             'comment' => 'required|string|max:1000',
         ]);
 
+        $hasPurchased = false;
+        if (Auth::check() && Auth::user()->customer) {
+            $hasPurchased = \App\Models\Order::where('customer_id', Auth::user()->customer->id)
+                ->whereIn('status', ['Selesai', 'Paid', 'Kirim'])
+                ->whereHas('orderItems', function ($query) use ($id) {
+                    $query->where('produk_id', $id);
+                })->exists();
+        }
+
+        if (!$hasPurchased) {
+            return redirect()->back()->with('error', 'Anda harus membeli produk ini terlebih dahulu sebelum dapat memberikan ulasan.');
+        }
+
         Review::create([
             'user_id' => Auth::id(),
             'produk_id' => $id,

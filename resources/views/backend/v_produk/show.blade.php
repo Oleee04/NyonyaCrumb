@@ -4,12 +4,12 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="card mb-4">
                 <div class="card-body">
                     <h4 class="card-title">{{ $judul }}</h4>
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label>Category</label>
                                 <select name="kategori_id" class="form-control
 @error('kategori_id') is-invalid @enderror" disabled>
@@ -29,10 +29,10 @@
                                     </span>
                                 @enderror
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label>Nama Produk</label>
                                 <input type="text" name="nama_produk" value="{{
-    old('nama_produk', $show->nama_produk) }}" class="form-control @error('nama_produk') isinvalid @enderror"
+    old('nama_produk', $show->nama_produk) }}" class="form-control @error('nama_produk') is-invalid @enderror"
                                     placeholder="Masukkan Nama Produk" disabled>
                                 @error('nama_produk')
                                     <span class="invalid-feedback alert-danger" role="alert">
@@ -40,7 +40,7 @@
                                     </span>
                                 @enderror
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label>Detail</label>
                                 <textarea name="detail" class="form-control
 @error('detail') is-invalid @enderror" id="ckeditor" disabled>{{ old('detail', $show->detail) }}
@@ -53,7 +53,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label>Foto Utama</label> <br>
                                 <img src="{{ asset('storage/img-produk/' . $show->foto) }}" class="foto-preview"
                                     width="100%">
@@ -81,10 +81,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="border-top">
+                <div class="border-top pt-3">
                     <div class="card-body">
                         <a href="{{ route('backend.produk.index') }}">
-                            <button type="button" class="btn btnsecondary">Kembali</button>
+                            <button type="button" class="btn btn-secondary">Kembali</button>
                         </a>
                     </div>
                 </div>

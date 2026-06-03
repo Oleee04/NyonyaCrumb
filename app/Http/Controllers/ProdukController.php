@@ -19,13 +19,23 @@ class ProdukController extends Controller
         $reviews = \App\Models\Review::where('produk_id', $id)->with('user')->orderBy('created_at', 'desc')->get();
         $averageRating = $reviews->avg('rating');
 
+        $hasPurchased = false;
+        if (auth()->check() && auth()->user()->customer) {
+            $hasPurchased = \App\Models\Order::where('customer_id', auth()->user()->customer->id)
+                ->whereIn('status', ['Selesai', 'Paid', 'Kirim'])
+                ->whereHas('orderItems', function ($query) use ($id) {
+                    $query->where('produk_id', $id);
+                })->exists();
+        }
+
         return view('v_produk.detail', [
             'judul' => 'Detail Produk',
             'kategori' => $kategori,
             'row' => $detail,
             'fotoProdukTambahan' => $fotoProdukTambahan,
             'reviews' => $reviews,
-            'averageRating' => $averageRating
+            'averageRating' => $averageRating,
+            'hasPurchased' => $hasPurchased
         ]);
     }
 

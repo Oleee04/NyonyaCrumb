@@ -1,268 +1,176 @@
 @extends('backend.v_layouts.app')
-
 @section('content')
-<style>
-    .electre-step { margin-bottom: 30px; }
-    .table-responsive { overflow-x: auto; }
-    .table th { background-color: #f8f9fa; text-align: center; vertical-align: middle; }
-    .table td { text-align: center; vertical-align: middle; }
-    .table-ranking th { background-color: #28a745; color: white; }
-</style>
-
-<div class="row">
-    <div class="col-12">
-        
-        <div class="card mb-4">
-            <div class="card-body">
-                <h4 class="card-title"><i class="fas fa-chart-line"></i> Sistem Pendukung Keputusan (SPK) - Metode ELECTRE</h4>
-                <p>Dashboard ini menampilkan perhitungan metode ELECTRE untuk menentukan produk terlaris berdasarkan kriteria: Varian Rasa, Ukuran, Harga, dan Jumlah Terjual.</p>
-                @if(isset($error))
-                    <div class="alert alert-danger">{{ $error }}</div>
-                @endif
-            </div>
+        <!-- Page Header -->
+        <div class="page-header fade-up">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ route('backend.beranda') }}">Dashboard</a></li>
+                    <li class="breadcrumb-sep">›</li>
+                    <li class="breadcrumb-item">Beranda</li>
+                </ol>
+            </nav>
+            <h1 class="page-title">Selamat datang kembali ✦</h1>
+            <p class="page-subtitle">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }} — Semoga hari Anda penuh manisnya Nyonya Crumb</p>
         </div>
 
-        @if(isset($alternatives) && count($alternatives) > 0)
-        <!-- 1. Kriteria & Bobot -->
-        <div class="card electre-step">
-            <div class="card-body">
-                <h5 class="card-title">1. Kriteria dan Bobot (W)</h5>
-                <table class="table table-bordered w-50">
-                    <thead>
-                        <tr>
-                            <th>Kode Kriteria</th>
-                            <th>Nama Kriteria</th>
-                            <th>Bobot (W)</th>
-                            <th>Atribut</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>C1</td><td>Varian Rasa</td><td>{{ $weights[0] }}</td><td>Benefit</td></tr>
-                        <tr><td>C2</td><td>Ukuran</td><td>{{ $weights[1] }}</td><td>Benefit</td></tr>
-                        <tr><td>C3</td><td>Harga</td><td>{{ $weights[2] }}</td><td>Cost</td></tr>
-                        <tr><td>C4</td><td>Jumlah Terjual</td><td>{{ $weights[3] }}</td><td>Benefit</td></tr>
-                    </tbody>
-                </table>
+        <!-- Stat Cards -->
+        <div class="grid-4 fade-up" style="animation-delay:0.05s;">
+
+            <div class="stat-card">
+                <div class="stat-icon-outer brand">
+                    <i class="ri-shopping-bag-3-line"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-val">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</div>
+                    <div class="stat-label">Total Penjualan</div>
+                </div>
             </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-outer emerald">
+                    <i class="ri-shopping-cart-2-line"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-val">{{ $totalPesananSelesai }}</div>
+                    <div class="stat-label">Pesanan Selesai</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-outer amber">
+                    <i class="ri-user-star-line"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-val">{{ $totalCustomer }}</div>
+                    <div class="stat-label">Pelanggan Aktif</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-outer rose">
+                    <i class="ri-cake-3-line"></i>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-val">{{ $totalProduk }}</div>
+                    <div class="stat-label">Produk Tersedia</div>
+                </div>
+            </div>
+
         </div>
 
-        <!-- 2. Matriks Keputusan (X) -->
-        <div class="card electre-step">
-            <div class="card-body">
-                <h5 class="card-title">2. Matriks Keputusan (X)</h5>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped w-75">
+        <!-- Main content row -->
+        <div class="grid-2 fade-up" style="animation-delay:0.1s;">
+
+            <!-- Recent Orders -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-header-title">
+                        <i class="ri-list-check-3" style="color:var(--brand);margin-right:6px;"></i>
+                        Pesanan Terbaru
+                    </span>
+                    <a href="{{ route('backend.pesanan.index') }}" class="btn btn-sm btn-outline">Lihat Semua</a>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <table class="table">
                         <thead>
                             <tr>
-                                <th>Alternatif</th>
-                                <th>C1 (Rasa)</th>
-                                <th>C2 (Ukuran)</th>
-                                <th>C3 (Harga)</th>
-                                <th>C4 (Terjual)</th>
+                                <th>Pelanggan</th>
+                                <th>Tanggal</th>
+                                <th>Total</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($alternatives as $idx => $alt)
+                            @foreach($recentOrders as $order)
                             <tr>
-                                <td class="text-left">{{ $alt['id'] }} - {{ $alt['nama'] }}</td>
-                                <td>{{ $matrix_x[$idx][0] }}</td>
-                                <td>{{ $matrix_x[$idx][1] }}</td>
-                                <td>{{ $matrix_x[$idx][2] }}</td>
-                                <td>{{ $matrix_x[$idx][3] }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. Matriks Normalisasi (R) -->
-        <div class="card electre-step">
-            <div class="card-body">
-                <h5 class="card-title">3. Matriks Normalisasi (R)</h5>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped w-75">
-                        <thead>
-                            <tr>
-                                <th>Alternatif</th>
-                                <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($alternatives as $idx => $alt)
-                            <tr>
-                                <td>{{ $alt['id'] }}</td>
-                                <td>{{ round($matrix_r[$idx][0], 4) }}</td>
-                                <td>{{ round($matrix_r[$idx][1], 4) }}</td>
-                                <td>{{ round($matrix_r[$idx][2], 4) }}</td>
-                                <td>{{ round($matrix_r[$idx][3], 4) }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. Matriks Normalisasi Terbobot (V) -->
-        <div class="card electre-step">
-            <div class="card-body">
-                <h5 class="card-title">4. Matriks Normalisasi Terbobot (V)</h5>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped w-75">
-                        <thead>
-                            <tr>
-                                <th>Alternatif</th>
-                                <th>C1</th><th>C2</th><th>C3</th><th>C4</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($alternatives as $idx => $alt)
-                            <tr>
-                                <td>{{ $alt['id'] }}</td>
-                                <td>{{ round($matrix_v[$idx][0], 4) }}</td>
-                                <td>{{ round($matrix_v[$idx][1], 4) }}</td>
-                                <td>{{ round($matrix_v[$idx][2], 4) }}</td>
-                                <td>{{ round($matrix_v[$idx][3], 4) }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <!-- 5. Matriks Concordance -->
-            <div class="col-md-6">
-                <div class="card electre-step">
-                    <div class="card-body">
-                        <h5 class="card-title">5. Matriks Concordance (C)</h5>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>C</th>
-                                        @foreach($alternatives as $idx => $alt) <th>{{ $alt['id'] }}</th> @endforeach
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($alternatives as $k => $alt1)
-                                    <tr>
-                                        <th>{{ $alt1['id'] }}</th>
-                                        @foreach($alternatives as $l => $alt2)
-                                            <td>{{ $k == $l ? '-' : $matrix_c[$k][$l] }}</td>
-                                        @endforeach
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 6. Matriks Discordance -->
-            <div class="col-md-6">
-                <div class="card electre-step">
-                    <div class="card-body">
-                        <h5 class="card-title">6. Matriks Discordance (D)</h5>
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>D</th>
-                                        @foreach($alternatives as $idx => $alt) <th>{{ $alt['id'] }}</th> @endforeach
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($alternatives as $k => $alt1)
-                                    <tr>
-                                        <th>{{ $alt1['id'] }}</th>
-                                        @foreach($alternatives as $l => $alt2)
-                                            <td>{{ $k == $l ? '-' : round($matrix_d[$k][$l], 4) }}</td>
-                                        @endforeach
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 7. Aggregate Dominance -->
-        <div class="card electre-step">
-            <div class="card-body">
-                <h5 class="card-title">7. Matriks Aggregate Dominance (E)</h5>
-                <p>
-                    Threshold C (<u>c</u>) = {{ round($c_threshold, 4) }}<br>
-                    Threshold D (<u>d</u>) = {{ round($d_threshold, 4) }}
-                </p>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-sm w-50">
-                        <thead>
-                            <tr>
-                                <th>E</th>
-                                @foreach($alternatives as $idx => $alt) <th>{{ $alt['id'] }}</th> @endforeach
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($alternatives as $k => $alt1)
-                            <tr>
-                                <th>{{ $alt1['id'] }}</th>
-                                @foreach($alternatives as $l => $alt2)
-                                    <td>{{ $k == $l ? '-' : $matrix_e[$k][$l] }}</td>
-                                @endforeach
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- 8. Hasil Akhir (Ranking) -->
-        <div class="card electre-step">
-            <div class="card-body">
-                <h4 class="card-title text-success"><i class="fas fa-trophy"></i> Kesimpulan: Ranking Produk Terlaris</h4>
-                <div class="table-responsive mt-3">
-                    <table class="table table-bordered table-hover table-ranking w-75">
-                        <thead>
-                            <tr>
-                                <th>Peringkat</th>
-                                <th class="text-left">Alternatif</th>
-                                <th class="text-left">Nama Produk</th>
-                                <th>Total Skor (Dominasi)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($rankings as $idx => $rank)
-                            <tr style="{{ $idx == 0 ? 'background-color: #d4edda; font-weight: bold;' : '' }}">
                                 <td>
-                                    @if($idx == 0) <i class="fas fa-medal text-warning"></i> 1
-                                    @elseif($idx == 1) <i class="fas fa-medal text-secondary"></i> 2
-                                    @elseif($idx == 2) <i class="fas fa-medal" style="color: #cd7f32;"></i> 3
-                                    @else {{ $idx + 1 }}
+                                    <div style="display:flex;align-items:center;gap:10px;">
+                                        <div class="demo-avatar" style="text-transform:uppercase;">
+                                            {{ substr($order->customer->user->nama ?? 'G', 0, 2) }}
+                                        </div>
+                                        <span>{{ $order->customer->user->nama ?? 'Guest' }}</span>
+                                    </div>
+                                </td>
+                                <td>{{ $order->created_at->format('d M Y') }}</td>
+                                <td style="font-weight:600;">Rp {{ number_format($order->total_harga ?? 0, 0, ',', '.') }}</td>
+                                <td>
+                                    @if($order->status == 'Selesai')
+                                        <span class="badge badge-success">Selesai</span>
+                                    @elseif($order->status == 'Proses')
+                                        <span class="badge badge-warning">Proses</span>
+                                    @elseif($order->status == 'Batal')
+                                        <span class="badge badge-danger">Batal</span>
+                                    @else
+                                        <span class="badge badge-info">{{ $order->status }}</span>
                                     @endif
                                 </td>
-                                <td class="text-left">{{ $rank['id'] }}</td>
-                                <td class="text-left">{{ $rank['nama'] }}</td>
-                                <td>{{ $rank['score'] }}</td>
                             </tr>
                             @endforeach
+                            @if($recentOrders->isEmpty())
+                            <tr>
+                                <td colspan="4" style="text-align:center;color:var(--ink-4);padding:24px;">Belum ada pesanan terbaru.</td>
+                            </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>
-                <div class="alert alert-info mt-3">
-                    <strong>Kesimpulan:</strong> Berdasarkan perhitungan Sistem Pendukung Keputusan (SPK) menggunakan metode ELECTRE, produk dengan peringkat terbaik adalah <strong>{{ $rankings[0]['id'] }} - {{ $rankings[0]['nama'] }}</strong>.
+            </div>
+
+            <!-- Top Products -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-header-title">
+                        <i class="ri-trophy-line" style="color:var(--brand);margin-right:6px;"></i>
+                        Produk Terlaris
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="product-list">
+                        @php
+                            $colors = ['brand', 'emerald', 'amber', 'rose', 'blue'];
+                            $bgColors = ['brand-pale', 'emerald-bg', 'amber-bg', 'rose-bg', 'blue-bg'];
+                            $textColors = ['brand-dk', 'emerald', '#b45309', 'rose', 'blue'];
+                            $icons = ['🥖', '🧁', '🍞', '🥐', '🥯'];
+                            $maxQty = $topProducts->max('total_qty') ?: 1;
+                        @endphp
+                        @foreach($topProducts as $index => $produk)
+                        @php
+                            $cIdx = $index % count($colors);
+                            $color = $colors[$cIdx];
+                            $bgColor = $bgColors[$cIdx];
+                            $textColor = $textColors[$cIdx];
+                            $icon = $icons[$cIdx];
+                            $percentage = ($produk->total_qty / $maxQty) * 100;
+                        @endphp
+                        <div class="product-item">
+                            <div class="product-img" style="background: var(--{{ $bgColor }});">
+                                @if(isset($produk->foto) && $produk->foto)
+                                    <img src="{{ asset('storage/img-produk/' . $produk->foto) }}" alt="foto" style="width:100%;height:100%;object-fit:cover;">
+                                @else
+                                    <span style="font-size: 1.2rem;">{{ $icon }}</span>
+                                @endif
+                            </div>
+                            <div class="product-info">
+                                <div class="product-name">{{ $produk->nama_produk }}</div>
+                                <div class="mini-progress">
+                                    <div class="mini-progress-bar" style="width:{{ $percentage }}%; background: {{ in_array($color, ['brand', 'emerald', 'rose', 'blue']) ? 'var(--'.$color.')' : '#d97706' }};"></div>
+                                </div>
+                            </div>
+                            <div class="product-stat" style="color: {{ strpos($textColor, '#') === 0 ? $textColor : 'var(--'.$textColor.')' }};">
+                                {{ $produk->total_qty }} <span style="font-size: 0.7rem; opacity: 0.7; font-weight: 500;">Terjual</span>
+                            </div>
+                        </div>
+                        @endforeach
+                        @if($topProducts->isEmpty())
+                            <div style="text-align:center;color:var(--ink-4);padding:24px;">Belum ada data produk terlaris.</div>
+                        @endif
+                    </div>
                 </div>
             </div>
+
         </div>
 
-        @endif
-    </div>
-</div>
+        <footer class="footer">
+            © {{ date('Y') }} Nyonya Crumb · Artisan Bakery Admin Panel · Crafted with care
+        </footer>
 @endsection

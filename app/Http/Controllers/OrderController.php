@@ -81,19 +81,22 @@ class OrderController extends Controller
         $request->validate([
             'noresi' => 'nullable|string',
             'status' => 'required|string',
-            'alamat' => 'required|string',
-            'pos' => 'required|string',
             'hp' => 'nullable|string|max:15',
         ]);
 
+        \Illuminate\Support\Facades\Log::info("Updating order $id", $request->all());
+
         $order = Order::findOrFail($id);
+        
+        \Illuminate\Support\Facades\Log::info("Before update:", $order->toArray());
+
         $order->update([
             'noresi' => $request->noresi,
             'status' => $request->status,
-            'alamat' => $request->alamat,
-            'pos' => $request->pos,
             'hp' => $request->hp,
         ]);
+
+        \Illuminate\Support\Facades\Log::info("After update:", $order->fresh()->toArray());
 
         return redirect()->back()->with('success', 'Pesanan berhasil diupdate');
     }
@@ -130,12 +133,16 @@ class OrderController extends Controller
             }
 
             // Tentukan harga berdasarkan ukuran yang dipilih
-            // Jika variant_price dikirim dari form dan valid, gunakan itu
-            // Fallback: BIG = harga produk, SMALL = harga produk * 0.42 (estimasi)
-            if ($variantPrice > 0) {
-                $harga = $variantPrice;
+            if ($size === 'SMALL') {
+                if ($produk->harga == 15000) {
+                    $harga = 10000;
+                } elseif ($produk->harga == 12000) {
+                    $harga = 5000;
+                } else {
+                    $harga = round($produk->harga * 0.42); // Fallback
+                }
             } else {
-                $harga = ($size === 'SMALL') ? round($produk->harga * 0.42) : $produk->harga;
+                $harga = $produk->harga; // BIG
             }
 
             // Cek stok
@@ -324,46 +331,54 @@ class OrderController extends Controller
 
     public function selectPayment($order_id)
     {
-        $user = Auth::user();
+        $user     = Auth::user();
         $customer = Customer::where('user_id', $user->id)->firstOrFail();
-        $order = Order::with('orderItems.produk')->where('id', $order_id)->firstOrFail();
+        $order    = Order::with('orderItems.produk')->where('id', $order_id)->firstOrFail();
 
         if ($order->status !== 'pending') {
             return redirect()->route('order.history')->with('error', 'Pesanan tidak valid atau sudah diproses.');
         }
 
-        // Validate stock before payment
+        // Validasi stok sebelum bayar
         foreach ($order->orderItems as $item) {
             $produk = $item->produk;
-            
             if ($produk->stok < $item->quantity) {
-                return redirect()->route('v_order.cart')->with('error', 'Stok produk ' . $produk->nama_produk . ' tidak mencukupi.');
+                return redirect()->route('v_order.cart')
+                    ->with('error', 'Stok produk ' . $produk->nama_produk . ' tidak mencukupi (tersisa: ' . $produk->stok . ').');
             }
         }
 
-        // Update order status
+        // Kurangi stok SEKARANG (untuk lingkungan lokal/sandbox yang
+        // tidak bisa menerima webhook callback dari Midtrans).
+        // Flag stock_deducted mencegah pengurangan ganda jika callback tetap masuk.
+        if (!$order->stock_deducted) {
+            $this->deductStock($order);
+            $order->stock_deducted = true;
+        }
+
+        // Tandai order sebagai Paid
         $order->status = 'Paid';
         $order->save();
 
-        // Midtrans setup
-        Config::$serverKey = config('midtrans.server_key');
+        // Setup Midtrans
+        Config::$serverKey    = config('midtrans.server_key');
         Config::$isProduction = false;
-        Config::$isSanitized = true;
-        Config::$is3ds = true;
+        Config::$isSanitized  = true;
+        Config::$is3ds        = true;
 
         $grossAmount = $order->total_harga + ($order->biaya_ongkir ?? 0);
 
         $params = [
             'transaction_details' => [
-                'order_id' => $order->id . '-' . time(),
+                'order_id'     => $order->id . '-' . time(),
                 'gross_amount' => (int) $grossAmount,
             ],
             'customer_details' => [
                 'first_name' => $user->nama,
-                'email' => $user->email,
-                'phone' => $order->hp ?? $user->hp,
+                'email'      => $user->email,
+                'phone'      => $order->hp ?? $user->hp,
                 'billing_address' => [
-                    'address' => $order->alamat,
+                    'address'     => $order->alamat,
                     'postal_code' => $order->pos,
                 ],
             ],
@@ -372,14 +387,19 @@ class OrderController extends Controller
 
         try {
             $snapToken = Snap::getSnapToken($params);
-            
             return view('v_order.selectpayment', [
-                'order' => $order,
+                'order'     => $order,
                 'snapToken' => $snapToken,
             ]);
         } catch (\Exception $e) {
             Log::error('Midtrans Error: ' . $e->getMessage());
-            return redirect()->route('v_order.cart')->with('error', 'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.');
+            // Kembalikan stok jika gagal buat token
+            $this->restoreStock($order);
+            $order->stock_deducted = false;
+            $order->status         = 'pending';
+            $order->save();
+            return redirect()->route('v_order.cart')
+                ->with('error', 'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.');
         }
     }
 
@@ -408,6 +428,26 @@ class OrderController extends Controller
         return $items;
     }
 
+    public function revertCheckout($order_id)
+    {
+        $user = Auth::user();
+        $customer = Customer::where('user_id', $user->id)->firstOrFail();
+        $order = Order::where('id', $order_id)->where('customer_id', $customer->id)->firstOrFail();
+
+        // Revert status to pending so it appears in the cart again
+        if ($order->status === 'Paid' || $order->status === 'pending') {
+            $order->status = 'pending';
+            
+            if ($order->stock_deducted) {
+                $this->restoreStock($order);
+            }
+            
+            $order->save();
+        }
+
+        return redirect()->route('v_order.cart')->with('success', 'Silakan perbarui pesanan Anda.');
+    }
+
     public function callback(Request $request)
     {
         Log::info('Midtrans Callback Diterima:', $request->all());
@@ -433,6 +473,9 @@ class OrderController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
+        // Reload order dengan relasi untuk deductStock / restoreStock
+        $order->load('orderItems');
+
         // Process payment status
         switch ($request->transaction_status) {
             case 'capture':
@@ -441,7 +484,7 @@ class OrderController extends Controller
                         $order->status = 'challenge';
                     } else {
                         $order->status = 'Paid';
-                        $this->deductStock($order);
+                        $this->deductStock($order); // aman: skip jika stock_deducted = true
                     }
                 } else {
                     $order->status = 'Paid';
@@ -455,19 +498,23 @@ class OrderController extends Controller
                 break;
 
             case 'pending':
-                $order->status = 'pending';
+                // Jangan ubah status jika sudah Paid (misal user sudah bayar via selectPayment)
+                if ($order->status !== 'Paid') {
+                    $order->status = 'pending';
+                }
                 break;
 
             case 'deny':
             case 'cancel':
             case 'expire':
                 $order->status = 'cancelled';
-                // Restore stock if it was deducted
-                $this->restoreStock($order);
+                $this->restoreStock($order); // aman: skip jika belum dikurangi
                 break;
 
             default:
-                $order->status = 'pending';
+                if ($order->status !== 'Paid') {
+                    $order->status = 'pending';
+                }
                 break;
         }
 
@@ -479,25 +526,45 @@ class OrderController extends Controller
 
     private function deductStock($order)
     {
+        // Jika stok sudah dikurangi sebelumnya (dari selectPayment), skip
+        if ($order->stock_deducted) {
+            Log::info("Stok order #{$order->id} sudah dikurangi sebelumnya, skip deductStock.");
+            return;
+        }
+
         foreach ($order->orderItems as $item) {
-            $produk = $item->produk;
-            
+            $produk = Produk::find($item->produk_id); // fresh query, bukan cache
+            if (!$produk) continue;
+
             if ($produk->stok >= $item->quantity) {
                 $produk->decrement('stok', $item->quantity);
-                Log::info("Stok produk {$produk->nama_produk} dikurangi {$item->quantity}. Sisa stok: " . ($produk->stok - $item->quantity));
+                Log::info("[deductStock] Stok '{$produk->nama_produk}' -{$item->quantity}. Sisa: " . ($produk->stok - $item->quantity));
             } else {
-                Log::warning("Stok produk {$produk->nama_produk} tidak mencukupi saat callback");
+                Log::warning("[deductStock] Stok '{$produk->nama_produk}' tidak mencukupi (ada: {$produk->stok}, butuh: {$item->quantity})");
             }
         }
+
+        $order->stock_deducted = true;
+        $order->save();
     }
 
     private function restoreStock($order)
     {
-        foreach ($order->orderItems as $item) {
-            $produk = $item->produk;
-            $produk->increment('stok', $item->quantity);
-            Log::info("Stok produk {$produk->nama_produk} dikembalikan {$item->quantity}");
+        // Hanya kembalikan stok jika memang sudah dikurangi
+        if (!$order->stock_deducted) {
+            Log::info("Stok order #{$order->id} belum dikurangi, tidak perlu restore.");
+            return;
         }
+
+        foreach ($order->orderItems as $item) {
+            $produk = Produk::find($item->produk_id);
+            if (!$produk) continue;
+            $produk->increment('stok', $item->quantity);
+            Log::info("[restoreStock] Stok '{$produk->nama_produk}' +{$item->quantity}");
+        }
+
+        $order->stock_deducted = false;
+        $order->save();
     }
 
     public function complete()

@@ -2,398 +2,264 @@
 
 @section('content')
 <style>
-    :root {
-        --primary: #C47A3E;
-        --primary-dark: #A05A2A;
-        --primary-light: #FDE8D4;
-        --bg-light: #FFF9F5;
-        --bg-white: #FFFFFF;
-        --text-dark: #1A1A1A;
-        --text-muted: #6B6B6B;
-        --border: #EFE5DC;
-        --danger: #C62828;
-        --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
-        --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
-        --radius-sm: 8px;
-        --radius-md: 16px;
-        --radius-lg: 24px;
+    .cart-main-section {
+        padding: 160px 0 100px;
+        min-height: 80vh;
+        background: var(--bg-creme);
     }
 
-    .cart-main-section {
-        padding: 60px 0 80px;
-        background: var(--bg-light);
-        min-height: 70vh;
-    }
     .cart-card {
         background: var(--bg-white);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        overflow: hidden;
-        padding: 30px;
+        border: 1px solid var(--border);
+        padding: 40px;
+        position: relative;
     }
+
     .section-title-cart {
-        margin-bottom: 32px;
-        border-bottom: 2px solid var(--border);
-        padding-bottom: 16px;
+        text-align: center;
+        margin-bottom: 50px;
     }
-    .section-title-cart p {
-        color: var(--primary);
-        letter-spacing: 2px;
-        font-size: 13px;
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
+
     .section-title-cart h3 {
-        font-size: 28px;
-        margin: 0;
-        font-family: 'Playfair Display', serif;
-    }
-    .shopping-cart-table {
-        width: 100%;
-        margin-bottom: 40px;
-    }
-    .shopping-cart-table th {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 42px;
         font-weight: 600;
         color: var(--text-dark);
-        border-bottom: 1px solid var(--border);
-        padding: 12px 8px;
+        margin-bottom: 10px;
     }
+
+    .section-title-cart p {
+        color: var(--text-muted);
+        font-size: 14px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .shopping-cart-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 50px;
+    }
+
+    .shopping-cart-table th {
+        text-align: left;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        padding: 15px 10px;
+        border-bottom: 1px solid var(--border);
+        font-weight: 600;
+    }
+
     .shopping-cart-table td {
+        padding: 25px 10px;
+        border-bottom: 1px solid var(--border-light);
         vertical-align: middle;
-        padding: 20px 8px;
-        border-bottom: 1px solid var(--border);
     }
+
     .cart-product-thumb img {
         width: 80px;
         height: 80px;
         object-fit: cover;
-        border-radius: var(--radius-sm);
+        background: var(--bg-creme);
+        border: 1px solid var(--border);
     }
+
     .cart-product-details a {
-        font-weight: 700;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 16px;
+        font-weight: 600;
         color: var(--text-dark);
         text-decoration: none;
     }
-    .cart-product-details ul {
-        margin: 8px 0 0;
-        padding: 0;
-        list-style: none;
+
+    .size-badge-nc {
+        display: inline-block;
+        font-size: 10px;
+        padding: 2px 8px;
+        background: var(--bg-creme);
+        color: var(--primary);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-top: 5px;
     }
-    .cart-product-details li {
-        font-size: 12px;
-        color: var(--text-muted);
-    }
+
     .qty-input {
-        width: 70px;
-        padding: 6px 8px;
-        border-radius: var(--radius-sm);
+        width: 60px;
+        padding: 8px;
         border: 1px solid var(--border);
         text-align: center;
+        font-size: 14px;
+        font-family: 'DM Sans', sans-serif;
     }
+
     .btn-update-qty {
-        background: var(--bg-light);
+        background: transparent;
         border: 1px solid var(--border);
-        padding: 6px 12px;
-        border-radius: var(--radius-sm);
-        font-size: 12px;
-        font-weight: 500;
-        margin-left: 6px;
-        transition: all 0.2s;
+        padding: 8px 12px;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
         cursor: pointer;
+        transition: 0.3s;
+        margin-left: 5px;
     }
+
     .btn-update-qty:hover {
-        background: var(--primary);
+        background: var(--text-dark);
         color: white;
-        border-color: var(--primary);
     }
+
     .btn-remove {
         background: none;
         border: none;
-        color: var(--danger);
-        font-size: 18px;
-        transition: transform 0.2s;
+        color: #E53935;
         cursor: pointer;
+        font-size: 16px;
+        transition: 0.3s;
     }
-    .btn-remove:hover { transform: scale(1.2); }
+
+    .btn-remove:hover {
+        transform: scale(1.1);
+    }
 
     .billing-details {
-        background: var(--bg-light);
-        padding: 24px;
-        border-radius: var(--radius-md);
+        padding: 30px;
+        border: 1px solid var(--border);
+        background: var(--bg-creme);
         height: 100%;
     }
+
     .billing-details h4 {
-        font-family: 'Inter', sans-serif;
-        margin-bottom: 20px;
-        font-weight: 700;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 25px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 10px;
     }
+
     .form-control-custom {
         width: 100%;
-        padding: 10px 14px;
+        padding: 12px;
         border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        margin-bottom: 16px;
-        font-family: 'Inter', sans-serif;
         background: white;
-        transition: border-color 0.2s;
-    }
-    .form-control-custom:focus {
-        outline: none;
-        border-color: var(--primary);
-    }
-    .btn-checkout {
-        background: var(--primary);
-        color: white;
-        border: none;
-        padding: 14px;
-        font-weight: 700;
-        border-radius: 40px;
-        width: 100%;
-        margin-top: 16px;
-        transition: all 0.3s;
-        cursor: pointer;
-        font-size: 15px;
-    }
-    .btn-checkout:hover {
-        background: var(--primary-dark);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-    .btn-checkout:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-    .alert-custom {
-        padding: 16px 20px;
-        border-radius: var(--radius-sm);
-        margin-bottom: 24px;
-    }
-    .empty-cart-box {
-        text-align: center;
-        padding: 60px 20px;
-    }
-    .empty-cart-box i {
-        font-size: 64px;
-        color: #9E9E9E;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
         margin-bottom: 20px;
     }
-    .btn-primary-custom {
-        background: var(--primary);
-        color: white;
-        padding: 12px 28px;
-        border-radius: 50px;
-        font-weight: 600;
-        transition: all 0.3s;
-        display: inline-block;
-        text-decoration: none;
-    }
-    .btn-primary-custom:hover {
-        background: var(--primary-dark);
-        transform: translateY(-3px);
-    }
-    .size-badge-cart {
-        display: inline-block;
-        padding: 2px 10px;
-        border-radius: 50px;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        margin-top: 4px;
-    }
-    .size-badge-cart.big  { background: var(--primary-light); color: var(--primary-dark); }
-    .size-badge-cart.small { background: #E3F2FD; color: #1565C0; }
 
-    /* ===== SHIPPING SECTION ===== */
-    .shipping-box {
-        background: white;
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
+    .btn-checkout-nc {
+        width: 100%;
         padding: 16px;
-        margin-bottom: 16px;
-    }
-    .shipping-box label {
-        font-size: 13px;
+        background: var(--text-dark);
+        color: white;
+        border: none;
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
         font-weight: 600;
-        color: var(--text-dark);
-        display: block;
-        margin-bottom: 6px;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 20px;
+    }
+
+    .btn-checkout-nc:hover:not(:disabled) {
+        background: var(--primary);
+    }
+
+    .btn-checkout-nc:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
     }
 
     .zona-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 14px;
-        border-radius: 50px;
-        font-size: 12px;
+        display: inline-block;
+        font-size: 11px;
+        padding: 4px 12px;
+        background: #E8F5E9;
+        color: #2E7D32;
         font-weight: 600;
-        margin-top: 4px;
-        margin-bottom: 12px;
-        transition: all 0.3s;
+        margin-bottom: 15px;
     }
-    .zona-badge.zona-1 { background: #d4edda; color: #155724; }
-    .zona-badge.zona-2 { background: #fff3cd; color: #856404; }
-    .zona-badge.zona-3 { background: #fde8d4; color: #7d3c00; }
-    .zona-badge.zona-4 { background: #f8d7da; color: #721c24; }
-    .zona-badge.zona-unknown { background: #e2e3e5; color: #383d41; }
-    .zona-badge.hidden { display: none; }
 
-    .ekspedisi-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 8px;
-    }
-    .ekspedisi-option {
-        display: block;
-    }
     .ekspedisi-label {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 12px 14px;
-        border: 1.5px solid var(--border);
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        transition: all 0.2s;
+        padding: 15px;
+        border: 1px solid var(--border);
         background: white;
-        user-select: none;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-bottom: 10px;
     }
+
     .ekspedisi-label:hover {
         border-color: var(--primary);
-        background: var(--primary-light);
     }
-    .ekspedisi-label input[type="radio"] {
-        accent-color: var(--primary);
-        width: 16px;
-        height: 16px;
-        flex-shrink: 0;
-    }
-    input[type="radio"]:checked + .ekspedisi-label,
-    .ekspedisi-label:has(input[type="radio"]:checked) {
-        border-color: var(--primary);
-        background: var(--primary-light);
-        box-shadow: 0 0 0 2px rgba(196,122,62,0.2);
-    }
-    .ekspedisi-info { flex: 1; }
+
     .ekspedisi-name {
         font-size: 13px;
-        font-weight: 700;
-        color: var(--text-dark);
+        font-weight: 600;
         display: block;
     }
+
     .ekspedisi-est {
         font-size: 11px;
         color: var(--text-muted);
-        display: block;
-        margin-top: 1px;
     }
-    .ekspedisi-price {
-        font-size: 13px;
-        font-weight: 700;
-        color: var(--primary);
-        white-space: nowrap;
-    }
-
-    .shipping-loading {
-        display: none;
-        text-align: center;
-        padding: 16px;
-        color: var(--text-muted);
-        font-size: 13px;
-        gap: 8px;
-        align-items: center;
-        justify-content: center;
-    }
-    .shipping-loading.show { display: flex; }
-    .mini-spinner {
-        width: 16px; height: 16px;
-        border: 2px solid var(--primary-light);
-        border-top-color: var(--primary);
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        flex-shrink: 0;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .shipping-hint {
-        text-align: center;
-        padding: 14px;
-        color: var(--text-muted);
-        font-size: 13px;
-        background: var(--bg-light);
-        border-radius: var(--radius-sm);
-        border: 1px dashed var(--border);
-    }
-    .shipping-hint i { margin-right: 6px; }
 
     .summary-table {
         width: 100%;
-        background: white;
-        border-radius: 12px;
-        border-collapse: collapse;
+        margin-top: 20px;
     }
-    .summary-table tr td {
-        padding: 12px 4px;
-        border-bottom: 1px solid var(--border);
+
+    .summary-table td {
+        padding: 10px 0;
+        font-size: 14px;
     }
-    .summary-table tr:last-child td { border-bottom: none; }
+
+    .total-row {
+        border-top: 1px solid var(--border);
+        padding-top: 20px;
+        margin-top: 20px;
+    }
 
     @media (max-width: 768px) {
+        .cart-main-section { padding: 180px 0 60px; }
         .cart-card { padding: 20px; }
         .shopping-cart-table thead { display: none; }
-        .shopping-cart-table tbody tr {
-            display: block;
-            margin-bottom: 30px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 16px;
-        }
-        .shopping-cart-table td {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-align: right;
-            padding: 10px 0;
-            border: none;
-        }
-        .shopping-cart-table td:before {
-            content: attr(data-label);
-            font-weight: 700;
-            text-align: left;
-            min-width: 100px;
-        }
-        .ekspedisi-grid { grid-template-columns: 1fr; }
+        .shopping-cart-table tr { display: block; margin-bottom: 25px; border-bottom: 2px solid var(--border); }
+        .shopping-cart-table td { display: block; text-align: right; padding: 10px 0; border: none; }
+        .shopping-cart-table td:before { content: attr(data-label); float: left; font-weight: 600; text-transform: uppercase; font-size: 11px; }
     }
 </style>
 
 <div class="cart-main-section">
     <div class="container">
         <div class="cart-card">
-            <div class="section-title-cart">
-                <p>🛒 YOUR CART</p>
-                <h3>Shopping Cart</h3>
+            <div class="section-title-cart reveal">
+                <p>Pesanan Anda</p>
+                <h3>Keranjang <i>Belanja</i></h3>
             </div>
 
             @if(session()->has('success'))
-            <div class="alert alert-success alert-custom" style="background:#d4edda;color:#155724; border:1px solid #c3e6cb;">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="float:right;">&times;</button>
-                <strong>{{ session('success') }}</strong>
+            <div class="alert alert-success alert-custom reveal" style="border-radius:0; border:none; background:#E8F5E9; color:#2E7D32;">
+                {{ session('success') }}
             </div>
             @endif
 
             @if(session()->has('error'))
-            <div class="alert alert-danger alert-custom" style="background:#f8d7da;color:#721c24; border:1px solid #f5c6cb;">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="float:right;">&times;</button>
-                <strong>{{ session('error') }}</strong>
+            <div class="alert alert-danger alert-custom reveal" style="border-radius:0; border:none; background:#FFEBEE; color:#C62828;">
+                {{ session('error') }}
             </div>
             @endif
 
             @if(isset($order) && $order && $order->orderItems->count() > 0)
             
-            <!-- FORM UPDATE & REMOVE (dipisah dari checkout form) -->
             @foreach($order->orderItems as $item)
             <form action="{{ route('order.updateCart', $item->id) }}" method="POST" id="updateForm{{ $item->id }}" style="display:none;">
                 @csrf
@@ -404,143 +270,126 @@
             </form>
             @endforeach
 
-            <!-- MAIN CHECKOUT FORM -->
             <form action="{{ route('order.checkout') }}" method="post" id="cartForm">
                 @csrf
                 <input type="hidden" name="biaya_ongkir" id="biaya_ongkir_hidden" value="0">
                 <input type="hidden" name="ekspedisi" id="ekspedisi_hidden" value="">
 
-                <table class="shopping-cart-table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th></th>
-                            <th class="text-center">Price</th>
-                            <th class="text-center">Quantity</th>
-                            <th class="text-center">Total</th>
-                            <th class="text-right"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php $totalHarga = 0; @endphp
-                        @foreach($order->orderItems as $item)
-                        @php $totalHarga += $item->harga * $item->quantity; @endphp
-                        <tr>
-                            <td class="cart-product-thumb" data-label="Product">
-                                @php
-                                    $fotoUrl = asset('frontend/images/default-product.jpg');
-                                    if($item->produk && $item->produk->foto) {
-                                        $fotoUrl = asset('storage/img-produk/' . $item->produk->foto);
-                                    } elseif($item->produk && $item->produk->fotoProduk->first()) {
-                                        $fotoUrl = asset('storage/img-produk/' . $item->produk->fotoProduk->first()->foto);
-                                    }
-                                @endphp
-                                <img src="{{ $fotoUrl }}" alt="{{ $item->produk->nama_produk ?? 'Produk' }}">
-                            </td>
-                            <td class="cart-product-details" data-label="Details">
-                                <a href="{{ route('produk.detail', $item->produk->id ?? '#') }}">{{ $item->produk->nama_produk ?? 'Produk' }}</a>
-                                @if($item->size)
-                                    <br>
-                                    <span class="size-badge-cart {{ strtolower($item->size) }}">{{ $item->size }}</span>
-                                @endif
-                                <ul>
-                                    <li><span>Berat: {{ $item->produk->berat ?? 0 }} Gram</span></li>
-                                    <li><span>Stok: {{ $item->produk->stok ?? 0 }}</span></li>
-                                </ul>
-                            </td>
-                            <td class="price text-center" data-label="Price">
-                                <strong>Rp {{ number_format($item->harga, 0, ',', '.') }}</strong>
-                            </td>
-                            <td class="qty text-center" data-label="Quantity">
-                                <input type="number" id="qty_{{$item->id}}" value="{{ $item->quantity }}" min="1" max="{{ $item->produk->stok ?? 99 }}" class="qty-input">
-                                <button type="button" class="btn-update-qty" onclick="updateCartItem({{ $item->id }})">Update</button>
-                            </td>
-                            <td class="total text-center" data-label="Total">
-                                <strong style="color: var(--primary);">Rp {{ number_format($item->harga * $item->quantity, 0, ',', '.') }}</strong>
-                            </td>
-                            <td class="text-right" data-label="">
-                                <button type="button" class="btn-remove" onclick="removeCartItem({{ $item->id }})">
-                                    <i class="fa fa-trash-o"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                <div class="table-responsive reveal">
+                    <table class="shopping-cart-table">
+                        <thead>
+                            <tr>
+                                <th>Produk</th>
+                                <th></th>
+                                <th>Harga</th>
+                                <th>Jumlah</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php $totalHarga = 0; @endphp
+                            @foreach($order->orderItems as $item)
+                            @php $totalHarga += $item->harga * $item->quantity; @endphp
+                            <tr>
+                                <td class="cart-product-thumb" data-label="Produk">
+                                    <img src="{{ asset('storage/img-produk/' . ($item->produk->foto ?? 'default.jpg')) }}" alt="{{ $item->produk->nama_produk ?? 'Produk' }}">
+                                </td>
+                                <td class="cart-product-details">
+                                    <a href="{{ route('produk.detail', $item->produk->id ?? '#') }}">{{ $item->produk->nama_produk ?? 'Produk' }}</a>
+                                    @if($item->size)
+                                        <br><span class="size-badge-nc">Ukuran: {{ $item->size }}</span>
+                                    @endif
+                                </td>
+                                <td data-label="Harga">
+                                    Rp {{ number_format($item->harga, 0, ',', '.') }}
+                                </td>
+                                <td data-label="Jumlah">
+                                    <input type="number" id="qty_{{$item->id}}" value="{{ $item->quantity }}" min="1" max="{{ $item->produk->stok ?? 99 }}" class="qty-input">
+                                    <button type="button" class="btn-update-qty" onclick="updateCartItem({{ $item->id }})">Update</button>
+                                </td>
+                                <td data-label="Total" style="font-weight: 600; color: var(--primary);">
+                                    Rp {{ number_format($item->harga * $item->quantity, 0, ',', '.') }}
+                                </td>
+                                <td class="text-right">
+                                    <button type="button" class="btn-remove" onclick="removeCartItem({{ $item->id }})">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-                <div class="row" style="margin-top: 30px;">
-                    <div class="col-md-6">
+                <div class="row reveal">
+                    <div class="col-md-7">
                         <div class="billing-details">
                             <h4>📦 Informasi Pengiriman</h4>
 
                             <div class="form-group">
-                                <label>Alamat Lengkap *</label>
+                                <label style="font-size:12px; text-transform:uppercase; letter-spacing:1px; font-weight:600; margin-bottom:10px; display:block;">Alamat Lengkap</label>
                                 <input type="text" name="alamat" class="form-control-custom" required placeholder="Masukkan alamat lengkap">
                             </div>
 
-                            <div class="form-group">
-                                <label>Kode Pos *</label>
-                                <div style="position:relative;">
-                                    <input type="text" name="pos" id="kode_pos" class="form-control-custom" required
-                                           placeholder="Contoh: 10110" maxlength="5"
-                                           style="margin-bottom:4px; padding-right: 40px;"
-                                           oninput="this.value = this.value.replace(/[^0-9]/g,'')">
-                                    <i class="fa fa-map-marker" style="position:absolute;right:14px;top:12px;color:var(--primary);pointer-events:none;"></i>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label style="font-size:12px; text-transform:uppercase; letter-spacing:1px; font-weight:600; margin-bottom:10px; display:block;">Kode Pos</label>
+                                        <input type="text" name="pos" id="kode_pos" class="form-control-custom" required placeholder="5 Digit Kode Pos" maxlength="5">
+                                    </div>
                                 </div>
-                                <span id="zona-badge" class="zona-badge hidden"></span>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label style="font-size:12px; text-transform:uppercase; letter-spacing:1px; font-weight:600; margin-bottom:10px; display:block;">Nomor Telepon</label>
+                                        <input type="text" name="hp" class="form-control-custom" required placeholder="Contoh: 0812..." maxlength="15">
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="form-group">
-                                <label>Nomor Telepon *</label>
-                                <input type="text" name="hp" class="form-control-custom" required placeholder="Nomor HP aktif" maxlength="15">
-                            </div>
+                            <div id="zona-badge" class="zona-badge hidden"></div>
 
-                            <div class="shipping-box">
-                                <label><i class="fa fa-truck" style="color:var(--primary); margin-right:6px;"></i> Pilih Ekspedisi & Layanan</label>
-                                <div id="shipping-hint" class="shipping-hint">
-                                    <i class="fa fa-info-circle"></i> Masukkan kode pos untuk melihat pilihan ekspedisi
+                            <div style="margin-top:20px;">
+                                <label style="font-size:12px; text-transform:uppercase; letter-spacing:1px; font-weight:600; margin-bottom:15px; display:block;">Pilih Ekspedisi</label>
+                                <div id="shipping-hint" style="font-size:13px; color:var(--text-muted); border:1px dashed var(--border); padding:15px; text-align:center;">
+                                    Masukkan kode pos untuk melihat pilihan ekspedisi
                                 </div>
-                                <div id="shipping-loading" class="shipping-loading">
-                                    <div class="mini-spinner"></div>
-                                    Menghitung ongkos kirim...
+                                <div id="shipping-loading" class="shipping-loading" style="display:none; text-align:center; padding:15px;">
+                                    <div class="mini-spinner"></div> Sedang menghitung...
                                 </div>
-                                <div id="ekspedisi-list" class="ekspedisi-grid"></div>
+                                <div id="ekspedisi-list"></div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-5">
                         <div class="billing-details">
-                            <h4>💰 Ringkasan Pesanan</h4>
+                            <h4>💰 Ringkasan Belanja</h4>
                             <table class="summary-table">
                                 <tr>
-                                    <td><strong>SUBTOTAL</strong></td>
-                                    <td style="text-align:right;"><strong id="subtotal_display">Rp {{ number_format($totalHarga, 0, ',', '.') }}</strong></td>
+                                    <td>Total Produk</td>
+                                    <td class="text-right">Rp {{ number_format($totalHarga, 0, ',', '.') }}</td>
                                 </tr>
                                 <tr id="shipping-cost-row" style="display:none;">
                                     <td>
-                                        <strong>BIAYA KIRIM</strong>
-                                        <div id="ekspedisi-terpilih" style="font-size:11px; color:var(--text-muted); margin-top:2px;"></div>
+                                        Ongkos Kirim
+                                        <div id="ekspedisi-terpilih" style="font-size:11px; color:var(--text-muted);"></div>
                                     </td>
-                                    <td style="text-align:right;">
-                                        <strong id="ongkir-display" style="color:var(--text-muted);">—</strong>
-                                    </td>
+                                    <td class="text-right" id="ongkir-display">—</td>
                                 </tr>
-                                <tr>
-                                    <td style="font-size:16px;"><strong>TOTAL PEMBAYARAN</strong></td>
-                                    <td style="text-align:right;">
-                                        <strong style="color:var(--primary); font-size:22px;" id="total_payment">
-                                            Rp {{ number_format($totalHarga, 0, ',', '.') }}
-                                        </strong>
+                                <tr class="total-row">
+                                    <td style="font-weight: 600; font-size: 16px;">Total Bayar</td>
+                                    <td class="text-right" style="font-weight: 600; font-size: 20px; color: var(--primary);" id="total_payment">
+                                        Rp {{ number_format($totalHarga, 0, ',', '.') }}
                                     </td>
                                 </tr>
                             </table>
 
-                            <button type="submit" class="btn-checkout" id="pay-button" disabled>
-                                ✅ LANJUTKAN PEMBAYARAN
+                            <button type="submit" class="btn-checkout-nc" id="pay-button" disabled>
+                                Lanjutkan Pembayaran
                             </button>
-                            <p id="checkout-hint" style="text-align:center; font-size:12px; color:var(--text-muted); margin-top:10px;">
-                                Masukkan kode pos untuk melihat pilihan ekspedisi
+                            <p id="checkout-hint" style="text-align:center; font-size:11px; color:var(--text-muted); margin-top:15px;">
+                                Lengkapi alamat & pilih ekspedisi untuk membayar
                             </p>
                         </div>
                     </div>
@@ -580,52 +429,24 @@ $(document).ready(function(){
 
     const shippingData = {
         '1': [
-            { kurir: 'JNE', service: 'OKE', cost: 9000, etd: '2-3 hari' },
-            { kurir: 'JNE', service: 'REG', cost: 12000, etd: '1-2 hari' },
+            { kurir: 'GoSend', service: 'Instant', cost: 25000, etd: 'Hari ini (2-3 Jam)' },
+            { kurir: 'GrabExpress', service: 'Instant', cost: 26000, etd: 'Hari ini (2-3 Jam)' },
+            { kurir: 'Paxel', service: 'Next Day', cost: 20000, etd: '1 hari' },
             { kurir: 'JNE', service: 'YES', cost: 20000, etd: '1 hari' },
-            { kurir: 'J&T', service: 'Reguler', cost: 10000, etd: '2-3 hari' },
-            { kurir: 'J&T', service: 'Express', cost: 15000, etd: '1-2 hari' },
-            { kurir: 'SiCepat', service: 'REG', cost: 11000, etd: '2-3 hari' },
-            { kurir: 'SiCepat', service: 'BEST', cost: 18000, etd: '1 hari' },
-            { kurir: 'AnterAja', service: 'Reguler', cost: 10000, etd: '2-4 hari' },
-            { kurir: 'Pos Indonesia', service: 'POS Reguler', cost: 12000, etd: '3-5 hari' },
-            { kurir: 'Lion Parcel', service: 'Reguler', cost: 13000, etd: '2-3 hari' }
+            { kurir: 'SiCepat', service: 'BEST', cost: 18000, etd: '1 hari' }
         ],
         '2': [
-            { kurir: 'JNE', service: 'OKE', cost: 16000, etd: '4-5 hari' },
-            { kurir: 'JNE', service: 'REG', cost: 21000, etd: '2-3 hari' },
+            { kurir: 'Paxel', service: 'Next Day', cost: 35000, etd: '1 hari' },
             { kurir: 'JNE', service: 'YES', cost: 35000, etd: '1-2 hari' },
-            { kurir: 'J&T', service: 'Reguler', cost: 18000, etd: '3-4 hari' },
-            { kurir: 'J&T', service: 'Express', cost: 25000, etd: '2-3 hari' },
-            { kurir: 'SiCepat', service: 'REG', cost: 20000, etd: '3-4 hari' },
-            { kurir: 'SiCepat', service: 'BEST', cost: 28000, etd: '2 hari' },
-            { kurir: 'AnterAja', service: 'Reguler', cost: 19000, etd: '3-5 hari' },
-            { kurir: 'Pos Indonesia', service: 'POS Reguler', cost: 18000, etd: '4-7 hari' },
-            { kurir: 'Lion Parcel', service: 'Reguler', cost: 22000, etd: '3-4 hari' }
+            { kurir: 'SiCepat', service: 'BEST', cost: 28000, etd: '1-2 hari' }
         ],
         '3': [
-            { kurir: 'JNE', service: 'OKE', cost: 28000, etd: '5-7 hari' },
-            { kurir: 'JNE', service: 'REG', cost: 35000, etd: '3-4 hari' },
-            { kurir: 'JNE', service: 'YES', cost: 55000, etd: '2-3 hari' },
-            { kurir: 'J&T', service: 'Reguler', cost: 30000, etd: '5-6 hari' },
-            { kurir: 'J&T', service: 'Express', cost: 40000, etd: '3-4 hari' },
-            { kurir: 'SiCepat', service: 'REG', cost: 32000, etd: '4-5 hari' },
-            { kurir: 'SiCepat', service: 'BEST', cost: 45000, etd: '3 hari' },
-            { kurir: 'AnterAja', service: 'Reguler', cost: 35000, etd: '5-7 hari' },
-            { kurir: 'Pos Indonesia', service: 'POS Reguler', cost: 30000, etd: '7-10 hari' },
-            { kurir: 'Lion Parcel', service: 'Reguler', cost: 38000, etd: '4-6 hari' }
+            { kurir: 'JNE', service: 'YES', cost: 55000, etd: '1-2 hari' },
+            { kurir: 'SiCepat', service: 'BEST', cost: 45000, etd: '1-2 hari' }
         ],
         '4': [
-            { kurir: 'JNE', service: 'OKE', cost: 45000, etd: '7-10 hari' },
-            { kurir: 'JNE', service: 'REG', cost: 55000, etd: '5-6 hari' },
-            { kurir: 'JNE', service: 'YES', cost: 85000, etd: '3-4 hari' },
-            { kurir: 'J&T', service: 'Reguler', cost: 50000, etd: '7-8 hari' },
-            { kurir: 'J&T', service: 'Express', cost: 65000, etd: '5-6 hari' },
-            { kurir: 'SiCepat', service: 'REG', cost: 55000, etd: '6-7 hari' },
-            { kurir: 'SiCepat', service: 'BEST', cost: 75000, etd: '4-5 hari' },
-            { kurir: 'AnterAja', service: 'Reguler', cost: 60000, etd: '7-10 hari' },
-            { kurir: 'Pos Indonesia', service: 'POS Reguler', cost: 50000, etd: '10-14 hari' },
-            { kurir: 'Lion Parcel', service: 'Reguler', cost: 65000, etd: '6-8 hari' }
+            { kurir: 'JNE', service: 'YES', cost: 85000, etd: '1-2 hari' },
+            { kurir: 'SiCepat', service: 'BEST', cost: 75000, etd: '1-2 hari' }
         ]
     };
 

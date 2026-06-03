@@ -12,6 +12,62 @@ use App\Helpers\ImageHelper;
 
 class CustomerController extends Controller
 {
+    // Manual Login Submit (username-based)
+    public function loginSubmit(Request $request)
+    {
+        $request->validate([
+            'username' => ['required', 'string'],
+            'password' => ['required'],
+        ]);
+
+        // Find user by username first
+        $user = User::where('username', $request->username)
+                    ->where('role', '2')
+                    ->where('status', 1)
+                    ->first();
+
+        if ($user && Auth::attempt(['email' => $user->email, 'password' => $request->password])) {
+            $request->session()->regenerate();
+            return redirect()->intended('beranda')->with('success', 'Berhasil login.');
+        }
+
+        return back()->withErrors([
+            'username' => 'Username atau password salah, atau akun Anda belum aktif.',
+        ])->onlyInput('username');
+    }
+
+    // Manual Register Submit (username-based)
+    public function registerSubmit(Request $request)
+    {
+        $validated = $request->validate([
+            'nama'     => ['required', 'string', 'max:255'],
+            'username' => ['required', 'string', 'max:50', 'unique:users', 'alpha_num'],
+            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'username.alpha_num'  => 'Username hanya boleh mengandung huruf dan angka (tanpa spasi).',
+            'username.unique'     => 'Username sudah digunakan, pilih username lain.',
+        ]);
+
+        // Create the user
+        $user = User::create([
+            'nama'     => $validated['nama'],
+            'email'    => $validated['email'],
+            'username' => strtolower($validated['username']),
+            'password' => Hash::make($validated['password']),
+            'role'     => '2', // Customer
+            'status'   => 1,   // Aktif
+        ]);
+
+        // Create the customer profile
+        Customer::create([
+            'user_id' => $user->id,
+        ]);
+
+        // Arahkan ke halaman login
+        return redirect()->route('auth.login')->with('success', 'Akun berhasil didaftarkan! Silakan login dengan username Anda.');
+    }
+
     // Redirect ke Google
     public function redirect()
     {
@@ -154,5 +210,29 @@ class CustomerController extends Controller
         ]);
 
         return redirect()->route('customer.akun', $id)->with('success', 'Data berhasil diperbarui');
+    }
+
+    // Hapus data customer
+    public function destroy($id)
+    {
+        $customer = Customer::findOrFail($id);
+        
+        // Hapus foto jika ada
+        if ($customer->user && $customer->user->foto) {
+            $oldImagePath = public_path('storage/img-customer/') . $customer->user->foto;
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
+            }
+        }
+        
+        // Hapus user yang terkait
+        if ($customer->user) {
+            $customer->user->delete();
+        }
+        
+        // Hapus customer (biasanya otomatis terhapus jika ada cascade on delete, tapi untuk pastinya)
+        $customer->delete();
+        
+        return redirect()->route('backend.customer.index')->with('success', 'Data customer berhasil dihapus');
     }
 }

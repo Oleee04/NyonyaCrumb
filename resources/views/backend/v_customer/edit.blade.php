@@ -33,7 +33,7 @@
                         @method('put')
                         @csrf
                         <div class="col-md-4">
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label>Foto</label>
                                 {{-- view image --}}
                                 @if ($edit->user && $edit->user->foto)
@@ -54,7 +54,7 @@
                             </div>
                         </div>
                         <div class="col-md-8">
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label>Nama</label>
                                 <input type="text" name="nama" value="{{ old('nama', $edit->user->nama) }}"
                                     class="form-control @error('nama') is-invalid @enderror" placeholder="Masukkan Nama">
@@ -64,7 +64,7 @@
                                     </span>
                                 @enderror
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label>Email</label>
                                 <input type="text" name="email" value="{{ old('email', $edit->user->email) }}"
                                     class="form-control @error('email') is-invalid @enderror" placeholder="Masukkan Email">
@@ -74,18 +74,18 @@
                                     </span>
                                 @enderror
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label>HP</label>
                                 <input type="text" onkeypress="return hanyaAngka(event)" name="hp"
                                     value="{{ old('hp', $edit->user->hp) }}"
-                                    class="form-control @error('hp') isinvalid @enderror" placeholder="Masukkan Nomor HP">
+                                    class="form-control @error('hp') is-invalid @enderror" placeholder="Masukkan Nomor HP">
                                 @error('hp')
                                     <span class="invalid-feedback alert-danger" role="alert">
                                         {{ $message }}
                                     </span>
                                 @enderror
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label>Alamat</label><br>
                                 <textarea name="alamat" class="form-control @error('alamat')
                                 is-invalid @enderror">{{ old('alamat', $edit->alamat) }}</textarea>
@@ -95,7 +95,7 @@
                                     </span>
                                 @enderror
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label>Kode Pos</label>
                                 <input type="text" name="pos" value="{{ old('pos', $edit->pos)
         }}" class="form-control @error('pos') is-invalid @enderror" placeholder="Masukkan Nomor

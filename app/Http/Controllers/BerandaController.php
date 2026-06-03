@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 
 class BerandaController extends Controller 
 { 
-    public function berandaBackend() 
+    public function spkElectre() 
     { 
         // Kriteria sesuai permintaan:
         // C1: Varian Rasa (Benefit)
@@ -52,7 +52,7 @@ class BerandaController extends Controller
         
         // Handle jika belum ada produk
         if (count($alternatives) == 0) {
-            return view('backend.v_beranda.index', ['error' => 'Belum ada produk untuk dihitung.']);
+            return view('backend.v_spk.index', ['error' => 'Belum ada produk untuk dihitung.']);
         }
         
         $matrix_x = [];
@@ -205,7 +205,7 @@ class BerandaController extends Controller
             return $b['score'] <=> $a['score'];
         });
 
-        return view('backend.v_beranda.index', [
+        return view('backend.v_spk.index', [
             'judul' => 'SPK Produk Terlaris',
             'sub' => 'Metode ELECTRE',
             'alternatives' => $alternatives,
@@ -222,12 +222,75 @@ class BerandaController extends Controller
         ]);
     } 
 
+    public function berandaBackend(Request $request) 
+    { 
+        $months = $request->input('months', 12); // Default 12 months
+
+        // Status pesanan yang dianggap aktif / terbayar
+        $statusAktif  = ['Paid', 'Kirim', 'Selesai'];
+        $statusSelesai = ['Selesai'];
+
+        $totalProduk          = Produk::count();
+        $totalCustomer        = \App\Models\Customer::count();
+        $totalPesananSelesai  = \App\Models\Order::whereIn('status', $statusAktif)->count();
+        $totalPendapatan      = \App\Models\Order::whereIn('status', $statusAktif)->sum('total_harga');
+
+        // Hitung start date berdasarkan filter bulan
+        $startDate = now()->subMonths($months)->startOfMonth();
+
+        // Data Grafik Penjualan (semua status aktif: Paid, Kirim, Selesai)
+        $salesData = \App\Models\Order::whereIn('status', $statusAktif)
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('SUM(total_harga) as total, MONTH(created_at) as bulan, YEAR(created_at) as tahun')
+            ->groupBy('tahun', 'bulan')
+            ->orderBy('tahun', 'asc')
+            ->orderBy('bulan', 'asc')
+            ->get();
+
+        $bulanIndo   = ['1' => 'Jan', '2' => 'Feb', '3' => 'Mar', '4' => 'Apr', '5' => 'Mei', '6' => 'Jun', '7' => 'Jul', '8' => 'Agu', '9' => 'Sep', '10' => 'Okt', '11' => 'Nov', '12' => 'Des'];
+        $chartLabels = [];
+        $chartValues = [];
+
+        foreach ($salesData as $data) {
+            $chartLabels[] = $bulanIndo[$data->bulan] . ' ' . $data->tahun;
+            $chartValues[] = $data->total;
+        }
+
+        // Top 5 Produk Terlaris
+        $topProducts = DB::table('order_item')
+            ->join('produk', 'order_item.produk_id', '=', 'produk.id')
+            ->select('produk.nama_produk', 'produk.foto', DB::raw('SUM(order_item.quantity) as total_qty'))
+            ->groupBy('produk.id', 'produk.nama_produk', 'produk.foto')
+            ->orderBy('total_qty', 'desc')
+            ->limit(5)
+            ->get();
+
+        // 5 Pesanan Terakhir
+        $recentOrders = \App\Models\Order::with('customer.user')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('backend.v_beranda.index', [
+            'judul'               => 'Beranda',
+            'totalProduk'         => $totalProduk,
+            'totalCustomer'       => $totalCustomer,
+            'totalPesananSelesai' => $totalPesananSelesai,
+            'totalPendapatan'     => $totalPendapatan,
+            'chartLabels'         => $chartLabels,
+            'chartValues'         => $chartValues,
+            'currentMonths'       => $months,
+            'topProducts'         => $topProducts,
+            'recentOrders'        => $recentOrders,
+        ]);
+    }
+
     public function index() 
     { 
         $produk = Produk::where('status', 1)->orderBy('updated_at', 'desc')->paginate(6); 
         return view('v_beranda.index', [ 
             'judul' => 'Halan Beranda', 
             'produk' => $produk, 
-        ]); 
-    } 
+        ]);
+    }
 }

@@ -17,9 +17,14 @@
 
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="text-center mb-4">
-                        <h2>Detail Pesanan #{{ $order->id }}</h2>
-                        <p class="text-muted">Tanggal: {{ $order->created_at->format('d M Y H:i') }}</p>
+                    <div class="d-flex align-items-center mb-4 pb-3" style="border-bottom: 1px solid #eee;">
+                        <a href="{{ route('backend.pesanan.index') }}" class="btn btn-sm btn-outline-secondary mr-3">
+                            <i class="fas fa-arrow-left"></i> Kembali
+                        </a>
+                        <div class="flex-grow-1 text-center" style="margin-right: 80px;">
+                            <h2 class="m-0">Detail Pesanan #{{ $order->id }}</h2>
+                            <p class="text-muted m-0">Tanggal: {{ $order->created_at->format('d M Y H:i') }}</p>
+                        </div>
                     </div>
 
                     <form action="{{ route('pesanan.update', $order->id) }}" method="POST">
@@ -31,6 +36,12 @@
                                 <h4 class="title">Informasi Pelanggan</h4>
                                 <p><strong>Nama:</strong> {{ $order->customer->user->nama ?? 'Tidak tersedia' }}</p>
                                 <p><strong>Email:</strong> {{ $order->customer->user->email ?? 'Tidak tersedia' }}</p>
+                                <p><strong>No. HP:</strong> {{ $order->hp ?? ($order->customer->user->hp ?? '-') }}</p>
+                                <p><strong>Alamat Pengiriman:</strong></p>
+                                <p>
+                                    {{ $order->alamat ?? '-' }}<br>
+                                    Kode Pos: {{ $order->pos ?? '-' }}
+                                </p>
                             </div>
 
                             <div class="col-md-6">
@@ -48,7 +59,7 @@
                                 </p>
                                 <p><strong>Total Pembayaran:</strong> Rp. {{ number_format($order->total_harga + $order->biaya_ongkir, 0, ',', '.') }}</p>
                                 @if($order->noresi)
-                                    <p><strong>No. Resi:</strong> {{ $order->noresi }}</p>
+                                    <p><strong>No. Resi:</strong><br>{!! nl2br(e($order->noresi)) !!}</p>
                                 @endif
                             </div>
                         </div>
@@ -86,6 +97,9 @@
                                             </td>
                                             <td>
                                                 <strong>{{ $item->produk->nama_produk }}</strong><br>
+                                                @if($item->size)
+                                                    <small style="color: #E91E63; font-weight: 600; text-transform: uppercase;">Ukuran: {{ $item->size }}</small><br>
+                                                @endif
                                                 <small class="text-muted">#{{ $item->produk->kategori->nama_kategori ?? '-' }}</small><br>
                                                 <small>Berat: {{ $item->produk->berat }}g</small><br>
                                                 <small>Stok: {{ $item->produk->stok }}</small>
@@ -99,7 +113,7 @@
                                 <tfoot>
                                     <tr>
                                         <th colspan="4" class="text-right">Subtotal:</th>
-                                        <th class="text-center">Rp. {{ number_format($totalHarga, 0, ',', '.') }}</th>
+                                        <th class="text-center">Rp. {{ number_format($order->total_harga, 0, ',', '.') }}</th>
                                     </tr>
                                     @if($order->biaya_ongkir > 0)
                                         <tr>
@@ -109,7 +123,7 @@
                                     @endif
                                     <tr>
                                         <th colspan="4" class="text-right">Total Bayar:</th>
-                                        <th class="text-center text-danger">Rp. {{ number_format($totalHarga + $order->biaya_ongkir, 0, ',', '.') }}</th>
+                                        <th class="text-center text-danger">Rp. {{ number_format($order->total_harga + $order->biaya_ongkir, 0, ',', '.') }}</th>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -118,17 +132,18 @@
                         <h4 class="title mt-4">Update Pesanan</h4>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
                                     <label for="noresi">No. Resi</label>
-                                    <input type="text" id="noresi" name="noresi" value="{{ old('noresi', $order->noresi) }}"
-                                           class="form-control @error('noresi') is-invalid @enderror">
+                                    <textarea id="noresi" name="noresi"
+                                           class="form-control @error('noresi') is-invalid @enderror" rows="3" placeholder="Masukkan satu atau beberapa no. resi">{{ old('noresi', $order->noresi ?? 'NC-' . str_pad($order->id, 8, '0', STR_PAD_LEFT)) }}</textarea>
+                                    <small class="text-muted">Gunakan baris baru (enter) jika ada lebih dari satu resi.</small>
                                     @error('noresi')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label for="status">Status</label>
                                     <select id="status" name="status" class="form-control @error('status') is-invalid @enderror">
                                         <option value="">- Pilih Status -</option>
@@ -137,27 +152,6 @@
                                         <option value="Selesai" {{ old('status', $order->status) == 'Selesai' ? 'selected' : '' }}>Selesai</option>
                                     </select>
                                     @error('status')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="alamat">Alamat</label>
-                                    <textarea id="alamat" name="alamat"
-                                              class="form-control @error('alamat') is-invalid @enderror"
-                                              rows="4">{{ old('alamat', $order->alamat) }}</textarea>
-                                    @error('alamat')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="pos">Kode Pos</label>
-                                    <input type="text" id="pos" name="pos" value="{{ old('pos', $order->pos) }}"
-                                           class="form-control @error('pos') is-invalid @enderror">
-                                    @error('pos')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

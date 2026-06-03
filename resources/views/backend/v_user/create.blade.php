@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="card mb-4">
                 <form class="form-horizontal" action="{{ route('backend.user.store') }}" method="post"
                     enctype="multipart/form-data">
                     @csrf
@@ -12,7 +12,7 @@
                         <h4 class="card-title"> {{$judul}} </h4>
                         <div class="row">
                             <div class="col-md-4">
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label>Foto</label>
                                     <img class="foto-preview">
                                     <input type="file" name="foto" class="form-control 
@@ -24,7 +24,7 @@
                                 </div>
                             </div>
                             <div class="col-md-8">
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label>Hak Ases</label>
                                     <select name="role" class="form-control @error('role')
                                     is-invalid @enderror">
@@ -44,7 +44,7 @@
                                         </span>
                                     @enderror
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label>Nama</label>
                                     <input type="text" name="nama" value="{{ old('nama')
 }}" class="form-control @error('nama') is-invalid @enderror" placeholder="Masukkan Nama">
@@ -54,7 +54,7 @@
                                         </span>
                                     @enderror
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label>Email</label>
                                     <input type="text" name="email" value="{{ old('email')
 }}" class="form-control @error('email') is-invalid @enderror" placeholder="Masukkan Email">
@@ -64,10 +64,10 @@
                                         </span>
                                     @enderror
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label>HP</label>
                                     <input type="text" onkeypress="return
-hanyaAngka(event)" name="hp" value="{{ old('hp') }}" class="form-control @error('hp') isinvalid @enderror"
+hanyaAngka(event)" name="hp" value="{{ old('hp') }}" class="form-control @error('hp') is-invalid @enderror"
                                         placeholder="Masukkan Nomor HP">
                                     @error('hp')
                                         <span class="invalid-feedback alert-danger" role="alert">
@@ -75,7 +75,7 @@ hanyaAngka(event)" name="hp" value="{{ old('hp') }}" class="form-control @error(
                                         </span>
                                     @enderror
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label>Password</label>
                                     <input type="password" name="password"
                                         class="form-control @error('password') is-invalid @enderror"
@@ -86,7 +86,7 @@ hanyaAngka(event)" name="hp" value="{{ old('hp') }}" class="form-control @error(
                                         </span>
                                     @enderror
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mb-3">
                                     <label>Konfirmasi Password</label>
                                     <input type="password" name="password_confirmation" class="form-control"
                                         placeholder="Konfirmasi Password">
@@ -94,11 +94,11 @@ hanyaAngka(event)" name="hp" value="{{ old('hp') }}" class="form-control @error(
                             </div>
                         </div>
                     </div>
-                    <div class="border-top">
+                    <div class="border-top pt-3">
                         <div class="card-body">
                             <button type="submit" class="btn btn-primary">Simpan</button>
                             <a href="{{ route('backend.user.index') }}">
-                                <button type="button" class="btn btnsecondary">Kembali</button>
+                                <button type="button" class="btn btn-secondary">Kembali</button>
                             </a>
                         </div>
                     </div>
