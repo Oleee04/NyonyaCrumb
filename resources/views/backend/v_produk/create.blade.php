@@ -420,7 +420,7 @@
                             <label><i class="ri-image-line" style="margin-right:4px;"></i>Foto Produk</label>
                             <div class="upload-zone" id="uploadZone">
                                 <input type="file" name="foto" id="fotoInput"
-                                       accept="image/*"
+                                       accept=".png, .jpg, .jpeg, .webp"
                                        class="@error('foto') is-invalid @enderror"
                                        onchange="previewFoto()">
                                 <img class="foto-preview" id="fotoPreview" alt="Preview Foto Produk">

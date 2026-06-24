@@ -36,7 +36,7 @@
                                 @endif
                             </div>
                             <div style="margin-top: 16px; max-width: 320px;">
-                                <input type="file" name="foto" id="fotoInput" class="form-control @error('foto') is-invalid @enderror" onchange="previewFoto()">
+                                <input type="file" name="foto" id="fotoInput" class="form-control @error('foto') is-invalid @enderror" onchange="previewFoto()" accept=".png, .jpg, .jpeg, .webp">
                                 <small style="display:block; margin-top:8px; color:var(--ink-4); font-size:0.75rem; line-height:1.4;">
                                     <i class="ri-information-line"></i> Gunakan foto format JPG/PNG, ukuran maksimal 1MB.
                                 </small>

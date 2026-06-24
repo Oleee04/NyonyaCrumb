@@ -194,7 +194,7 @@
                             
                             <div class="file-upload-wrapper mt-3">
                                 <button type="button" class="btn-upload-nc"><i class="fa fa-camera"></i> Ubah Foto</button>
-                                <input type="file" name="foto" onchange="previewFoto(this)">
+                                <input type="file" name="foto" onchange="previewFoto(this)" accept=".png, .jpg, .jpeg, .webp">
                             </div>
                             @error('foto')
                                 <div class="text-danger mt-2" style="font-size: 12px;">{{ $message }}</div>

@@ -143,7 +143,12 @@ class CustomerController extends Controller
                 ->with('msgError', 'Anda tidak berhak mengakses akun ini.');
         }
 
-        $customer = Customer::where('user_id', $id)->firstOrFail();
+        $customer = Customer::where('user_id', $id)->first();
+        if (!$customer) {
+            $customer = Customer::create([
+                'user_id' => $id,
+            ]);
+        }
 
         return view('v_customer.edit', [
             'judul'     => 'Customer',
@@ -155,7 +160,12 @@ class CustomerController extends Controller
     // Update data akun customer
     public function updateAkun(Request $request, $id)
     {
-        $customer = Customer::where('user_id', $id)->firstOrFail();
+        $customer = Customer::where('user_id', $id)->first();
+        if (!$customer) {
+            $customer = Customer::create([
+                'user_id' => $id,
+            ]);
+        }
 
         $rules = [
             'nama' => 'required|max:255',

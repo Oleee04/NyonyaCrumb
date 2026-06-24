@@ -442,7 +442,7 @@
                             <label><i class="ri-image-line" style="margin-right:4px;"></i>Foto Produk</label>
                             <div class="upload-zone has-preview" id="uploadZone">
                                 <input type="file" name="foto" id="fotoInput"
-                                       accept="image/*"
+                                       accept=".png, .jpg, .jpeg, .webp"
                                        class="@error('foto') is-invalid @enderror"
                                        onchange="previewFoto()">
                                 @if ($edit->foto)

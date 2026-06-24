@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="description" content="Admin Panel Nyonya Crumb - Artisan Bakery">
 
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('image/nyonyacrumb.png') }}">
+    <link rel="shortcut icon" href="{{ asset('image/nyonyacrumb.png') }}">
+
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css">
@@ -236,6 +239,10 @@
         .sidebar-item.selected > .sidebar-link i { color: var(--brand); }
 
         /* Submenu */
+        .collapse {
+            display: none;
+        }
+
         .first-level {
             list-style: none;
             padding: 2px 0 4px 14px;
@@ -1380,6 +1387,15 @@
 
         toggle.addEventListener('click', function (e) {
             e.preventDefault();
+            
+            // Jika sidebar sedang ciut (collapsed), rentangkan terlebih dahulu
+            if (document.body.classList.contains('sb-collapsed')) {
+                document.body.classList.remove('sb-collapsed');
+                toggle.setAttribute('aria-expanded', 'true');
+                sub.style.display = 'block';
+                return;
+            }
+
             const isOpen = toggle.getAttribute('aria-expanded') === 'true';
             toggle.setAttribute('aria-expanded', !isOpen);
             sub.style.display = isOpen ? 'none' : 'block';

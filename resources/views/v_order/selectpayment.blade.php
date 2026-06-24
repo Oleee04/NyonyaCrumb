@@ -201,7 +201,7 @@
         snap.pay('{{ $snapToken }}', {
             onSuccess: function(result) {
                 console.log('Success:', result);
-                window.location.href = "{{ route('order.complete') }}";
+                window.location.href = "{{ route('order.complete', ['order_id' => $order->id]) }}";
             },
             onPending: function(result) {
                 console.log('Pending:', result);
@@ -209,10 +209,12 @@
             },
             onError: function(result) {
                 console.log('Error:', result);
-                alert("Payment failed. Please try again.");
+                alert("Payment failed. Redirecting to cart.");
+                window.location.href = "{{ route('order.revert_checkout', ['order_id' => $order->id]) }}";
             },
             onClose: function() {
-                alert('Transaction canceled.');
+                alert('Transaction canceled. Redirecting to cart.');
+                window.location.href = "{{ route('order.revert_checkout', ['order_id' => $order->id]) }}";
             }
         });
     });

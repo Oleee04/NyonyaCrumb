@@ -110,6 +110,70 @@
     .chart-card h3 { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
         letter-spacing: 0.8px; margin: 0 0 16px; }
     .chart-canvas-wrap { position: relative; }
+
+    /* ── Formula Card ── */
+    .formula-card {
+        background: #faf7f4;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    .formula-header {
+        padding: 12px 18px;
+        background: #f1ede9;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        color: var(--cocoa-deep);
+        user-select: none;
+        transition: background-color 0.2s ease;
+    }
+    .formula-header:hover {
+        background: #e8e2dc;
+    }
+    .formula-body {
+        padding: 16px 18px;
+        font-size: 13.5px;
+        color: var(--text);
+        line-height: 1.6;
+        border-top: 1px solid var(--border);
+    }
+    .formula-body p {
+        margin: 0 0 10px 0;
+    }
+    .formula-body p:last-child {
+        margin-bottom: 0;
+    }
+    .formula-body ul {
+        margin: 0 0 10px 20px;
+        padding: 0;
+    }
+    .formula-body li {
+        margin-bottom: 4px;
+    }
+    .formula-body .equation {
+        font-size: 15px;
+        margin: 12px 0;
+        text-align: center;
+        color: var(--cocoa-deep);
+        background: #fff;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        overflow-x: auto;
+    }
+    .toggle-icon {
+        transition: transform 0.2s ease;
+    }
+    .formula-card.collapsed .formula-body {
+        display: none;
+    }
+    .formula-card.collapsed .toggle-icon {
+        transform: rotate(-90deg);
+    }
 </style>
 
 @php
@@ -178,6 +242,19 @@
 
             {{-- STEP 1: Data --}}
             <div class="step-panel active" data-panel="0">
+                <div class="formula-card collapsed">
+                    <div class="formula-header" onclick="toggleFormula(this)">
+                        <span><i class="fas fa-calculator"></i> <strong>Rumus & Penjelasan: Matriks Keputusan (X)</strong></span>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="formula-body">
+                        <p>Matriks keputusan $X$ berukuran $m \times n$ memuat nilai evaluasi untuk setiap alternatif terhadap berbagai kriteria. Nilai ini bersumber dari file Excel yang diunggah.</p>
+                        <div class="equation">
+                            $$X = \begin{pmatrix} x_{11} & x_{12} & \cdots & x_{1n} \\ x_{21} & x_{22} & \cdots & x_{2n} \\ \vdots & \vdots & \ddots & \vdots \\ x_{m1} & x_{m2} & \cdots & x_{mn} \end{pmatrix}$$
+                        </div>
+                        <p>Di mana $x_{ij}$ merupakan nilai alternatif ke-$i$ pada kriteria ke-$j$.</p>
+                    </div>
+                </div>
                 <div class="tbl-wrap">
                     <table>
                         <thead><tr>
@@ -200,6 +277,24 @@
 
             {{-- STEP 2: Bobot --}}
             <div class="step-panel" data-panel="1">
+                <div class="formula-card collapsed">
+                    <div class="formula-header" onclick="toggleFormula(this)">
+                        <span><i class="fas fa-calculator"></i> <strong>Rumus & Penjelasan: Vektor Bobot Kriteria (W)</strong></span>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="formula-body">
+                        <p>Setiap kriteria memiliki bobot kepentingan $w_j$ yang menunjukkan tingkat kepentingannya. Vektor bobot didefinisikan sebagai:</p>
+                        <div class="equation">
+                            $$W = [w_1, w_2, \dots, w_n]$$
+                        </div>
+                        <p>Di mana $\sum_{j=1}^n w_j = 1$ (jika dinormalisasi). Nilai bobot kriteria yang digunakan sistem ini adalah:</p>
+                        <ul>
+                            @foreach($result['criteria'] as $c)
+                                <li><strong>{{ $c }}</strong>: {{ $fmt($result['weights'][$c]) }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
                 <div class="tbl-wrap">
                     <table>
                         <thead><tr>
@@ -214,6 +309,19 @@
 
             {{-- STEP 3: Normalisasi --}}
             <div class="step-panel" data-panel="2">
+                <div class="formula-card collapsed">
+                    <div class="formula-header" onclick="toggleFormula(this)">
+                        <span><i class="fas fa-calculator"></i> <strong>Rumus & Penjelasan: Normalisasi Matriks Keputusan (R)</strong></span>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="formula-body">
+                        <p>Normalisasi bertujuan untuk menyamakan skala nilai antar kriteria yang berbeda. Setiap nilai $x_{ij}$ dibagi dengan panjang vektor kolom kriteria tersebut:</p>
+                        <div class="equation">
+                            $$r_{ij} = \frac{x_{ij}}{\sqrt{\sum_{k=1}^m x_{kj}^2}}$$
+                        </div>
+                        <p>Hasil normalisasi dinotasikan sebagai elemen $r_{ij}$ pada matriks keputusan ternormalisasi $R$.</p>
+                    </div>
+                </div>
                 <div class="tbl-wrap">
                     <table>
                         <thead><tr>
@@ -234,6 +342,18 @@
 
             {{-- STEP 4: Preferensi --}}
             <div class="step-panel" data-panel="3">
+                <div class="formula-card collapsed">
+                    <div class="formula-header" onclick="toggleFormula(this)">
+                        <span><i class="fas fa-calculator"></i> <strong>Rumus & Penjelasan: Matriks Keputusan Terbobot (V)</strong></span>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="formula-body">
+                        <p>Mengalikan setiap kolom matriks ternormalisasi $R$ dengan bobot kriteria yang bersesuaian $w_j$. Langkah ini memprioritaskan kriteria berdasarkan tingkat kepentingannya:</p>
+                        <div class="equation">
+                            $$v_{ij} = r_{ij} \times w_j$$
+                        </div>
+                    </div>
+                </div>
                 <div class="tbl-wrap">
                     <table>
                         <thead><tr>
@@ -254,6 +374,26 @@
 
             {{-- STEP 5: Concordance --}}
             <div class="step-panel" data-panel="4">
+                <div class="formula-card collapsed">
+                    <div class="formula-header" onclick="toggleFormula(this)">
+                        <span><i class="fas fa-calculator"></i> <strong>Rumus & Penjelasan: Himpunan & Matriks Concordance (C)</strong></span>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="formula-body">
+                        <p>Himpunan kriteria Concordance $C_{kl}$ dibentuk untuk setiap pasang alternatif $A_k$ dan $A_l$, berisi kriteria di mana nilai alternatif $A_k$ lebih baik atau sama dengan $A_l$ ($v_{kj} \ge v_{lj}$).</p>
+                        <div class="equation">
+                            $$C_{kl} = \{ j \mid v_{kj} \ge v_{lj} \}$$
+                        </div>
+                        <p>Nilai indeks Concordance $c_{kl}$ dihitung dengan menjumlahkan bobot kriteria yang termasuk dalam himpunan $C_{kl}$:</p>
+                        <div class="equation">
+                            $$c_{kl} = \sum_{j \in C_{kl}} w_j$$
+                        </div>
+                        <p>Threshold Concordance ($\underline{c}$) diperoleh dari rata-rata nilai indeks concordance non-diagonal:</p>
+                        <div class="equation">
+                            $$\underline{c} = \frac{\sum_{k=1}^m \sum_{l=1, l \neq k}^m c_{kl}}{m(m-1)}$$
+                        </div>
+                    </div>
+                </div>
                 <div class="threshold-tag">
                     <i class="fas fa-sliders-h"></i>
                     Threshold Concordance: <strong>{{ $fmt($result['threshold_concordance']) }}</strong>
@@ -278,6 +418,26 @@
 
             {{-- STEP 6: Discordance --}}
             <div class="step-panel" data-panel="5">
+                <div class="formula-card collapsed">
+                    <div class="formula-header" onclick="toggleFormula(this)">
+                        <span><i class="fas fa-calculator"></i> <strong>Rumus & Penjelasan: Himpunan & Matriks Discordance (D)</strong></span>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="formula-body">
+                        <p>Himpunan kriteria Discordance $D_{kl}$ berisi kriteria di mana nilai alternatif $A_k$ lebih buruk (lebih kecil) dibanding $A_l$ ($v_{kj} < v_{lj}$).</p>
+                        <div class="equation">
+                            $$D_{kl} = \{ j \mid v_{kj} < v_{lj} \}$$
+                        </div>
+                        <p>Nilai indeks Discordance $d_{kl}$ dihitung dengan membagi perbedaan nilai absolut maksimum pada kriteria Discordance dengan perbedaan nilai absolut maksimum secara global:</p>
+                        <div class="equation">
+                            $$d_{kl} = \frac{\max_{j \in D_{kl}} |v_{kj} - v_{lj}|}{\max_{\text{semua } j} |v_{kj} - v_{lj}|}$$
+                        </div>
+                        <p>Threshold Discordance ($\underline{d}$) diperoleh dari rata-rata nilai indeks discordance non-diagonal:</p>
+                        <div class="equation">
+                            $$\underline{d} = \frac{\sum_{k=1}^m \sum_{l=1, l \neq k}^m d_{kl}}{m(m-1)}$$
+                        </div>
+                    </div>
+                </div>
                 <div class="threshold-tag">
                     <i class="fas fa-sliders-h"></i>
                     Threshold Discordance: <strong>{{ $fmt($result['threshold_discordance']) }}</strong>
@@ -302,6 +462,19 @@
 
             {{-- STEP 7: Dominan C --}}
             <div class="step-panel" data-panel="6">
+                <div class="formula-card collapsed">
+                    <div class="formula-header" onclick="toggleFormula(this)">
+                        <span><i class="fas fa-calculator"></i> <strong>Rumus & Penjelasan: Matriks Dominan Concordance (F)</strong></span>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="formula-body">
+                        <p>Matriks Dominan Concordance $F$ adalah matriks Boolean yang membandingkan indeks concordance $c_{kl}$ dengan nilai threshold $\underline{c}$:</p>
+                        <div class="equation">
+                            $$f_{kl} = \begin{cases} 1, & \text{jika } c_{kl} \ge \underline{c} \\ 0, & \text{jika } c_{kl} < \underline{c} \end{cases}$$
+                        </div>
+                        <p>Nilai 1 menunjukkan alternatif $A_k$ mendominasi alternatif $A_l$ dari segi kriteria concordance.</p>
+                    </div>
+                </div>
                 <div class="tbl-wrap">
                     <table>
                         <thead><tr>
@@ -322,6 +495,19 @@
 
             {{-- STEP 8: Dominan D --}}
             <div class="step-panel" data-panel="7">
+                <div class="formula-card collapsed">
+                    <div class="formula-header" onclick="toggleFormula(this)">
+                        <span><i class="fas fa-calculator"></i> <strong>Rumus & Penjelasan: Matriks Dominan Discordance (G)</strong></span>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="formula-body">
+                        <p>Matriks Dominan Discordance $G$ dihitung dengan membandingkan indeks discordance $d_{kl}$ dengan nilai threshold $\underline{d}$. Sesuai konfigurasi sistem, persamaannya didefinisikan sebagai:</p>
+                        <div class="equation">
+                            $$g_{kl} = \begin{cases} 1, & \text{jika } d_{kl} \ge \underline{d} \\ 0, & \text{jika } d_{kl} < \underline{d} \end{cases}$$
+                        </div>
+                        <p>Nilai 1 menunjukkan ketidakcocokan antara alternatif $A_k$ dan $A_l$ melebihi ambang batas threshold.</p>
+                    </div>
+                </div>
                 <div class="tbl-wrap">
                     <table>
                         <thead><tr>
@@ -342,6 +528,19 @@
 
             {{-- STEP 9: Aggregate --}}
             <div class="step-panel" data-panel="8">
+                <div class="formula-card collapsed">
+                    <div class="formula-header" onclick="toggleFormula(this)">
+                        <span><i class="fas fa-calculator"></i> <strong>Rumus & Penjelasan: Matriks Dominasi Agregat (E)</strong></span>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="formula-body">
+                        <p>Menggabungkan matriks dominan concordance $F$ dan matriks dominan discordance $G$ dengan melakukan perkalian elemen-per-elemen (perkalian Boolean):</p>
+                        <div class="equation">
+                            $$e_{kl} = f_{kl} \times g_{kl}$$
+                        </div>
+                        <p>Alternatif $A_k$ mendominasi alternatif $A_l$ secara mutlak hanya jika elemen $e_{kl} = 1$.</p>
+                    </div>
+                </div>
                 <div class="tbl-wrap">
                     <table>
                         <thead><tr>
@@ -362,6 +561,19 @@
 
             {{-- STEP 10: Ranking --}}
             <div class="step-panel" data-panel="9">
+                <div class="formula-card collapsed">
+                    <div class="formula-header" onclick="toggleFormula(this)">
+                        <span><i class="fas fa-calculator"></i> <strong>Rumus & Penjelasan: Perangkingan Alternatif</strong></span>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="formula-body">
+                        <p>Skor dominasi untuk setiap alternatif dihitung dengan menjumlahkan dominasi yang ia miliki terhadap alternatif lain di dalam matriks Aggregate Dominance:</p>
+                        <div class="equation">
+                            $$\text{Jumlah Dominasi } (A_k) = \sum_{l=1, l \neq k}^m e_{kl}$$
+                        </div>
+                        <p>Alternatif dengan Jumlah Dominasi tertinggi ditempatkan pada peringkat pertama. Jika skor sama, digunakan metode dense ranking.</p>
+                    </div>
+                </div>
                 <div class="tbl-wrap">
                     <table>
                         <thead><tr>
@@ -391,6 +603,15 @@
 
             {{-- STEP 11: Grafik --}}
             <div class="step-panel" data-panel="10">
+                <div class="formula-card collapsed">
+                    <div class="formula-header" onclick="toggleFormula(this)">
+                        <span><i class="fas fa-calculator"></i> <strong>Visualisasi Hasil Analisis</strong></span>
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div class="formula-body">
+                        <p>Menampilkan grafik perbandingan jumlah dominasi dari setiap alternatif menggunakan <strong>Bar Chart</strong> untuk melihat sebaran dominasi secara horizontal, serta <strong>Doughnut Chart</strong> untuk persentase dominasinya.</p>
+                    </div>
+                </div>
                 <div class="charts-grid">
                     <div class="chart-card">
                         <h3>Jumlah Dominasi per Alternatif</h3>
@@ -597,5 +818,15 @@ goStep(0);
         });
     }
 })();
+
+function toggleFormula(header) {
+    const card = header.closest('.formula-card');
+    card.classList.toggle('collapsed');
+}
 </script>
+
+{{-- KaTeX Math Rendering --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 @endsection

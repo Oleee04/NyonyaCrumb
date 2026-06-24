@@ -348,18 +348,6 @@ class OrderController extends Controller
             }
         }
 
-        // Kurangi stok SEKARANG (untuk lingkungan lokal/sandbox yang
-        // tidak bisa menerima webhook callback dari Midtrans).
-        // Flag stock_deducted mencegah pengurangan ganda jika callback tetap masuk.
-        if (!$order->stock_deducted) {
-            $this->deductStock($order);
-            $order->stock_deducted = true;
-        }
-
-        // Tandai order sebagai Paid
-        $order->status = 'Paid';
-        $order->save();
-
         // Setup Midtrans
         Config::$serverKey    = config('midtrans.server_key');
         Config::$isProduction = false;
@@ -567,9 +555,19 @@ class OrderController extends Controller
         $order->save();
     }
 
-    public function complete()
+    public function complete($order_id)
     {
-        return redirect()->route('order.history')->with('success', 'Checkout berhasil');
+        $order = Order::findOrFail($order_id);
+
+        if ($order->status !== 'Paid') {
+            $order->status = 'Paid';
+            if (!$order->stock_deducted) {
+                $this->deductStock($order);
+            }
+            $order->save();
+        }
+
+        return redirect()->route('order.history')->with('success', 'Pembayaran berhasil dan pesanan Anda sedang diproses.');
     }
 
     public function formOrderProses()
@@ -587,9 +585,12 @@ class OrderController extends Controller
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal',
         ]);
 
+        $start = \Carbon\Carbon::parse($request->tanggal_awal)->startOfDay();
+        $end = \Carbon\Carbon::parse($request->tanggal_akhir)->endOfDay();
+
         $orders = Order::with(['customer.user'])
             ->whereIn('status', ['Paid', 'Kirim'])
-            ->whereBetween('created_at', [$request->tanggal_awal, $request->tanggal_akhir])
+            ->whereBetween('created_at', [$start, $end])
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -689,9 +690,12 @@ class OrderController extends Controller
             'tanggal_akhir' => 'required|date|after_or_equal:tanggal_awal',
         ]);
 
+        $start = \Carbon\Carbon::parse($request->tanggal_awal)->startOfDay();
+        $end = \Carbon\Carbon::parse($request->tanggal_akhir)->endOfDay();
+
         $orders = Order::with(['customer.user'])
             ->where('status', 'Selesai')
-            ->whereBetween('created_at', [$request->tanggal_awal, $request->tanggal_akhir])
+            ->whereBetween('created_at', [$start, $end])
             ->orderBy('created_at', 'asc')
             ->get();
 

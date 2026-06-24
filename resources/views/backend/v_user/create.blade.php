@@ -16,7 +16,7 @@
                                     <label>Foto</label>
                                     <img class="foto-preview">
                                     <input type="file" name="foto" class="form-control 
-@error('foto') is-invalid @enderror" onchange="previewFoto()">
+@error('foto') is-invalid @enderror" onchange="previewFoto()" accept=".png, .jpg, .jpeg, .webp">
                                     @error('foto')
                                         <div class="invalid-feedback alert-danger">{{ $message
                                             }}</div>
@@ -107,5 +107,28 @@ hanyaAngka(event)" name="hp" value="{{ old('hp') }}" class="form-control @error(
         </div>
     </div>
 </div>
+
+<script>
+    function previewFoto() {
+        const input = document.querySelector('input[name="foto"]');
+        const preview = document.querySelector('.foto-preview');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                preview.style.width = '100%';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function hanyaAngka(evt) {
+        var charCode = (evt.which) ? evt.which : event.keyCode
+        if (charCode > 31 && (charCode < 48 || charCode > 57))
+            return false;
+        return true;
+    }
+</script>
 <!-- contentAkhir -->
 @endsection

@@ -13,6 +13,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\ElectreController;
+use App\Http\Controllers\ProfileMatchingController;
  
 Route::get('/', function () { 
     // return view('welcome'); 
@@ -22,8 +23,7 @@ Route::get('/', function () {
 
 Route::get('backend/login', [LoginController::class, 'loginBackend'])->name('backend.login'); 
 Route::post('backend/login', [LoginController::class, 'authenticateBackend'])->name('backend.login'); 
-Route::post('backend/register', [LoginController::class, 'registerBackend'])->name('backend.register'); 
-Route::post('backend/logout', [LoginController::class, 'logoutBackend'])->name('backend.logout'); 
+Route::match(['get', 'post'], 'backend/logout', [LoginController::class, 'logoutBackend'])->name('backend.logout'); 
 
 Route::middleware(['auth', 'is.admin'])->group(function () {
     Route::get('backend/beranda', [BerandaController::class, 'berandaBackend'])->name('backend.beranda'); 
@@ -100,6 +100,7 @@ Route::post('/contact', [ContactController::class, 'submit'])->name('contact.sub
 Route::get('/produk/detail/{id}', [ProdukController::class, 'detail'])->name('produk.detail');
 Route::get('/produk/kategori/{id}', [ProdukController::class, 'produkKategori'])->name('produk.kategori');
 Route::get('/produk/all', [ProdukController::class, 'produkAll'])->name('produk.all');
+Route::post('/produk/rekomendasi', [ProfileMatchingController::class, 'analyze'])->name('produk.rekomendasi');
 
 // Cart route (accessible to all to allow viewing empty cart)
 Route::get('/cart', [OrderController::class, 'viewCart'])->name('v_order.cart');
@@ -123,7 +124,7 @@ Route::get('/auth/reset-password', [ForgotPasswordController::class, 'showResetF
 Route::post('/auth/reset-password', [ForgotPasswordController::class, 'resetPassword'])->name('auth.reset-password.submit');
 
 // Logout 
-Route::post('/logout', [CustomerController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], '/logout', [CustomerController::class, 'logout'])->name('logout');
 
 // Midtrans Callback (harus di luar middleware untuk menerima notifikasi dari Midtrans)
 Route::post('/midtrans/callback', [OrderController::class, 'callback'])->name('midtrans.callback');
@@ -155,7 +156,8 @@ Route::middleware('is.customer')->group(function () {
     Route::get('/order/selectpayment/{order_id}', [OrderController::class, 'selectPayment'])->name('order.selectpayment');
     Route::get('/order/{order_id}/revert-checkout', [OrderController::class, 'revertCheckout'])->name('order.revert_checkout');
     Route::get('/order/pending', [OrderController::class, 'pending'])->name('order.pending');
-    Route::get('/order/complete', [OrderController::class, 'complete'])->name('order.complete');
+    Route::get('/order/complete/{order_id}', [OrderController::class, 'complete'])->name('order.complete');
+
 
     // Route untuk history
     Route::get('/history', [OrderController::class, 'history'])->name('order.history');

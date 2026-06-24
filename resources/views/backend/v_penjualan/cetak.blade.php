@@ -1,7 +1,3 @@
-@extends('backend.v_layouts.app')
-
-@section('content')
-
 <style>
     h4 {
         color: #2B2D42;
@@ -93,4 +89,11 @@
     </table>
 </div>
 
-@endsection
+<script>
+    window.onload = function () {
+        printStruk();
+    }
+    function printStruk() {
+        window.print();
+    }
+</script>

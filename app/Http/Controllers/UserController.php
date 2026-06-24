@@ -156,8 +156,8 @@ class UserController extends Controller
             'tanggal_akhir.after_or_equal' => 'Tanggal Akhir harus lebih besar atau sama dengan Tanggal Awal.',
         ]);
 
-        $tanggalAwal = $request->input('tanggal_awal');
-        $tanggalAkhir = $request->input('tanggal_akhir');
+        $tanggalAwal = \Carbon\Carbon::parse($request->input('tanggal_awal'))->startOfDay();
+        $tanggalAkhir = \Carbon\Carbon::parse($request->input('tanggal_akhir'))->endOfDay();
 
         $user = User::whereIn('role', ['0', '1'])
                     ->whereBetween('created_at', [$tanggalAwal, $tanggalAkhir])
@@ -166,8 +166,8 @@ class UserController extends Controller
 
         return view('backend.v_user.cetak', [
             'judul' => 'Laporan User',
-            'tanggalAwal' => $tanggalAwal,
-            'tanggalAkhir' => $tanggalAkhir,
+            'tanggalAwal' => $request->input('tanggal_awal'),
+            'tanggalAkhir' => $request->input('tanggal_akhir'),
             'cetak' => $user
         ]);
     }
@@ -179,8 +179,11 @@ class UserController extends Controller
         'end_date'   => 'required|date|after_or_equal:start_date',
     ]);
 
+    $start = \Carbon\Carbon::parse($request->start_date)->startOfDay();
+    $end = \Carbon\Carbon::parse($request->end_date)->endOfDay();
+
     $produk = Produk::with('kategori')
-        ->whereBetween('created_at', [$request->start_date, $request->end_date])
+        ->whereBetween('created_at', [$start, $end])
         ->orderBy('created_at', 'asc')
         ->get();
 
@@ -205,9 +208,12 @@ class UserController extends Controller
         'end_date'   => 'required|date|after_or_equal:start_date',
     ]);
 
+    $start = \Carbon\Carbon::parse($request->start_date)->startOfDay();
+    $end = \Carbon\Carbon::parse($request->end_date)->endOfDay();
+
     $penjualan = Order::with('customer')
-        ->whereBetween('created_at', [$request->start_date, $request->end_date])
-        ->where('status', 'selesai')
+        ->whereBetween('created_at', [$start, $end])
+        ->whereIn('status', ['selesai', 'Selesai'])
         ->orderBy('created_at', 'asc')
         ->get();
 

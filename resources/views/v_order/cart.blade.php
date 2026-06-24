@@ -429,24 +429,8 @@ $(document).ready(function(){
 
     const shippingData = {
         '1': [
-            { kurir: 'GoSend', service: 'Instant', cost: 25000, etd: 'Hari ini (2-3 Jam)' },
-            { kurir: 'GrabExpress', service: 'Instant', cost: 26000, etd: 'Hari ini (2-3 Jam)' },
-            { kurir: 'Paxel', service: 'Next Day', cost: 20000, etd: '1 hari' },
-            { kurir: 'JNE', service: 'YES', cost: 20000, etd: '1 hari' },
-            { kurir: 'SiCepat', service: 'BEST', cost: 18000, etd: '1 hari' }
-        ],
-        '2': [
-            { kurir: 'Paxel', service: 'Next Day', cost: 35000, etd: '1 hari' },
-            { kurir: 'JNE', service: 'YES', cost: 35000, etd: '1-2 hari' },
-            { kurir: 'SiCepat', service: 'BEST', cost: 28000, etd: '1-2 hari' }
-        ],
-        '3': [
-            { kurir: 'JNE', service: 'YES', cost: 55000, etd: '1-2 hari' },
-            { kurir: 'SiCepat', service: 'BEST', cost: 45000, etd: '1-2 hari' }
-        ],
-        '4': [
-            { kurir: 'JNE', service: 'YES', cost: 85000, etd: '1-2 hari' },
-            { kurir: 'SiCepat', service: 'BEST', cost: 75000, etd: '1-2 hari' }
+            { kurir: 'GoSend', service: 'Instant', cost: 12000, etd: 'Hari ini (Maks 5 Jam)' },
+            { kurir: 'GrabExpress', service: 'Instant', cost: 13000, etd: 'Hari ini (Maks 5 Jam)' }
         ]
     };
 

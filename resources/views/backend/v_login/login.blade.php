@@ -332,41 +332,6 @@
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ── Tab row ── */
-        .tab-row {
-            display: flex;
-            gap: 4px;
-            background: var(--parchment);
-            border-radius: 10px;
-            padding: 4px;
-            margin-bottom: 8px;
-            border: 1px solid var(--linen);
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 9px 12px;
-            border: none;
-            background: transparent;
-            border-radius: 8px;
-            font-family: 'Jost', sans-serif;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: var(--ink-soft);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .tab-btn.active {
-            background: var(--white);
-            color: var(--cocoa-deep);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-        }
-        .tab-btn:not(.active):hover {
-            color: var(--cocoa);
-            background: rgba(255,255,255,0.5);
-        }
-
         /* ── Form header ── */
         .form-eyebrow {
             display: flex;
@@ -622,12 +587,6 @@
         <!-- ── RIGHT: Form page ── -->
         <div class="form-page">
 
-            <!-- Tab Switcher -->
-            <div class="tab-row">
-                <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Masuk</button>
-                <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Daftar</button>
-            </div>
-
             <!-- ═══ LOGIN PANEL ═══ -->
             <div id="panelLogin">
                 <!-- Header -->
@@ -695,95 +654,6 @@
                 </form>
             </div>
 
-            <!-- ═══ REGISTER PANEL ═══ -->
-            <div id="panelRegister" style="display:none;">
-                <div class="form-eyebrow" style="margin-top:4px;">
-                    <div class="form-eyebrow-line"></div>
-                    <span>Buat Akun Admin</span>
-                </div>
-                <h2 class="form-heading" style="font-size:34px; margin-bottom:20px;">Daftar<br><em>Akun Baru</em></h2>
-
-                @if(session()->has('success'))
-                <div class="alert-box" style="border-color:#5c8a5a; background:#f0faf0; color:#3a6e38;">
-                    <i class="fas fa-check-circle"></i>
-                    <span>{{ session('success') }}</span>
-                </div>
-                @endif
-
-                <form action="{{ route('backend.register') }}" method="post" id="registerForm">
-                    @csrf
-
-                    <div class="field">
-                        <label class="field-label" for="reg_nama">Nama Lengkap</label>
-                        <div class="field-wrap">
-                            <i class="fas fa-id-card field-icon"></i>
-                            <input type="text" id="reg_nama" name="nama" value="{{ old('nama') }}"
-                                class="field-input @error('nama') is-invalid @enderror"
-                                placeholder="Nama lengkap" autocomplete="name">
-                        </div>
-                        @error('nama')
-                        <span class="field-error"><i class="fas fa-circle-exclamation"></i> {{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <div class="field">
-                        <label class="field-label" for="reg_username">Username</label>
-                        <div class="field-wrap">
-                            <i class="fas fa-user field-icon"></i>
-                            <input type="text" id="reg_username" name="username" value="{{ old('username') }}"
-                                class="field-input @error('username') is-invalid @enderror"
-                                placeholder="huruf_dan_angka_saja" autocomplete="off">
-                        </div>
-                        @error('username')
-                        <span class="field-error"><i class="fas fa-circle-exclamation"></i> {{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <div class="field">
-                        <label class="field-label" for="reg_email">Email</label>
-                        <div class="field-wrap">
-                            <i class="fas fa-envelope field-icon"></i>
-                            <input type="email" id="reg_email" name="email" value="{{ old('email') }}"
-                                class="field-input @error('email') is-invalid @enderror"
-                                placeholder="admin@nyonyacrumb.com" autocomplete="email">
-                        </div>
-                        @error('email')
-                        <span class="field-error"><i class="fas fa-circle-exclamation"></i> {{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <div class="field">
-                        <label class="field-label" for="reg_password">Kata Sandi</label>
-                        <div class="field-wrap">
-                            <i class="fas fa-lock field-icon"></i>
-                            <input type="password" id="reg_password" name="password"
-                                class="field-input @error('password') is-invalid @enderror"
-                                placeholder="Min. 8 karakter">
-                            <button type="button" class="field-toggle" id="toggleRegPassword">
-                                <i class="far fa-eye-slash"></i>
-                            </button>
-                        </div>
-                        @error('password')
-                        <span class="field-error"><i class="fas fa-circle-exclamation"></i> {{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <div class="field">
-                        <label class="field-label" for="reg_password_confirmation">Konfirmasi Sandi</label>
-                        <div class="field-wrap">
-                            <i class="fas fa-lock field-icon"></i>
-                            <input type="password" id="reg_password_confirmation" name="password_confirmation"
-                                class="field-input" placeholder="Ketik ulang sandi">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn-submit" id="registerBtn">
-                        <span>Daftar Sekarang</span>
-                        <i class="fas fa-user-plus arrow-icon"></i>
-                    </button>
-                </form>
-            </div>
-
             <!-- spacer -->
             <div></div>
         </div>
@@ -793,30 +663,6 @@
 
 <script>
 (function () {
-    // ── Tab switching ──
-    window.switchTab = function(tab) {
-        const loginPanel    = document.getElementById('panelLogin');
-        const registerPanel = document.getElementById('panelRegister');
-        const tabLogin      = document.getElementById('tabLogin');
-        const tabRegister   = document.getElementById('tabRegister');
-        if (tab === 'login') {
-            loginPanel.style.display    = '';
-            registerPanel.style.display = 'none';
-            tabLogin.classList.add('active');
-            tabRegister.classList.remove('active');
-        } else {
-            loginPanel.style.display    = 'none';
-            registerPanel.style.display = '';
-            tabLogin.classList.remove('active');
-            tabRegister.classList.add('active');
-        }
-    };
-
-    // Auto-switch to register tab if there are register errors (from old input)
-    @if($errors->has('nama') || $errors->has('username') || old('reg_username'))
-    switchTab('register');
-    @endif
-
     // ── Login password toggle ──
     const pwd = document.getElementById('password');
     const tog = document.getElementById('togglePassword');
@@ -825,21 +671,6 @@
             const show = pwd.getAttribute('type') === 'password';
             pwd.setAttribute('type', show ? 'text' : 'password');
             const ico = tog.querySelector('i');
-            if (ico) {
-                ico.classList.toggle('fa-eye-slash', !show);
-                ico.classList.toggle('fa-eye', show);
-            }
-        });
-    }
-
-    // ── Register password toggle ──
-    const regPwd = document.getElementById('reg_password');
-    const regTog = document.getElementById('toggleRegPassword');
-    if (regPwd && regTog) {
-        regTog.addEventListener('click', function () {
-            const show = regPwd.getAttribute('type') === 'password';
-            regPwd.setAttribute('type', show ? 'text' : 'password');
-            const ico = regTog.querySelector('i');
             if (ico) {
                 ico.classList.toggle('fa-eye-slash', !show);
                 ico.classList.toggle('fa-eye', show);
@@ -859,23 +690,6 @@
                 if (loginBtn.disabled) {
                     loginBtn.disabled = false;
                     loginBtn.innerHTML = '<span>Masuk Sekarang</span><i class="fas fa-arrow-right arrow-icon"></i>';
-                }
-            }, 6000);
-        });
-    }
-
-    // ── Register loading state ──
-    const regForm = document.getElementById('registerForm');
-    const regBtn  = document.getElementById('registerBtn');
-    if (regForm && regBtn) {
-        regForm.addEventListener('submit', function () {
-            if (regBtn.disabled) return;
-            regBtn.disabled = true;
-            regBtn.innerHTML = '<div class="spinner"></div><span>Mendaftar…</span>';
-            setTimeout(function () {
-                if (regBtn.disabled) {
-                    regBtn.disabled = false;
-                    regBtn.innerHTML = '<span>Daftar Sekarang</span><i class="fas fa-user-plus arrow-icon"></i>';
                 }
             }, 6000);
         });

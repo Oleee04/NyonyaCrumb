@@ -4,7 +4,7 @@
 <div class="row">
     <div class="col-12">
         <div class="card mb-4">
-            <form action="{{ route('backend.laporan.cetakpenjualan') }}" method="post" class="form-horizontal">
+            <form action="{{ route('backend.laporan.cetakpenjualan') }}" method="post" class="form-horizontal" target="_blank">
                 @csrf
                 <div class="card-body">
                     <h4 class="card-title">{{ $judul ?? 'Form Cetak Penjualan' }}</h4>

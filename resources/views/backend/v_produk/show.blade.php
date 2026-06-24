@@ -108,7 +108,7 @@ enctype="multipart/form-data">
 <div class="col-md-12">
 <input type="hidden" name="produk_id" value="{{ $show->id }}">
 <input type="file" name="foto_produk[]" class="form-control
-@error('foto_produk') is-invalid @enderror">
+@error('foto_produk') is-invalid @enderror" accept=".png, .jpg, .jpeg, .webp">
 <button type="submit" class="btn btn-success">Simpan</button>
 </div>
 </form>

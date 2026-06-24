@@ -54,7 +54,7 @@ class ProdukController extends Controller
         ]);
     }
 
-    public function produkAll()
+    public function produkAll(Request $request)
     {
         $kategori = Kategori::orderBy('nama_kategori', 'desc')->get();
         $produk = Produk::where('status', 1)->orderBy('updated_at', 'desc')->paginate(6);
@@ -280,18 +280,155 @@ class ProdukController extends Controller
             'tanggal_akhir.after_or_equal' => 'Tanggal Akhir harus lebih besar atau sama dengan Tanggal Awal.'
         ]);
 
-        $tanggalAwal = $request->input('tanggal_awal');
-        $tanggalAkhir = $request->input('tanggal_akhir');
+        $start = \Carbon\Carbon::parse($request->input('tanggal_awal'))->startOfDay();
+        $end = \Carbon\Carbon::parse($request->input('tanggal_akhir'))->endOfDay();
 
-        $produk = Produk::whereBetween('updated_at', [$tanggalAwal, $tanggalAkhir])
+        $produk = Produk::whereBetween('created_at', [$start, $end])
                         ->orderBy('id', 'desc')
                         ->get();
 
         return view('backend.v_produk.cetak', [
             'judul' => 'Laporan Produk',
-            'tanggalAwal' => $tanggalAwal,
-            'tanggalAkhir' => $tanggalAkhir,
+            'tanggalAwal' => $request->input('tanggal_awal'),
+            'tanggalAkhir' => $request->input('tanggal_akhir'),
             'cetak' => $produk
         ]);
+    }
+
+    private function runElectre(array $alternatives, array $weights, array $kriteria_jenis): array
+    {
+        $m = count($alternatives);
+        $n = 3;
+        if ($m < 2) {
+            return $alternatives;
+        }
+
+        $matrix_x = [];
+        foreach ($alternatives as $alt) {
+            $matrix_x[] = [$alt['c1'], $alt['c2'], $alt['c3']];
+        }
+
+        $pembagi = [];
+        for ($j = 0; $j < $n; $j++) {
+            $sum_sq = 0;
+            for ($i = 0; $i < $m; $i++) {
+                $sum_sq += pow($matrix_x[$i][$j], 2);
+            }
+            $pembagi[$j] = sqrt($sum_sq);
+        }
+
+        $matrix_r = [];
+        for ($i = 0; $i < $m; $i++) {
+            for ($j = 0; $j < $n; $j++) {
+                $matrix_r[$i][$j] = $pembagi[$j] == 0 ? 0 : ($matrix_x[$i][$j] / $pembagi[$j]);
+            }
+        }
+
+        $matrix_v = [];
+        for ($i = 0; $i < $m; $i++) {
+            for ($j = 0; $j < $n; $j++) {
+                $matrix_v[$i][$j] = $matrix_r[$i][$j] * $weights[$j];
+            }
+        }
+
+        $c_index = [];
+        $d_index = [];
+        for ($k = 0; $k < $m; $k++) {
+            for ($l = 0; $l < $m; $l++) {
+                if ($k != $l) {
+                    $c_index[$k][$l] = [];
+                    $d_index[$k][$l] = [];
+                    for ($j = 0; $j < $n; $j++) {
+                        if ($kriteria_jenis[$j] == 'benefit') {
+                            if ($matrix_v[$k][$j] >= $matrix_v[$l][$j]) {
+                                $c_index[$k][$l][] = $j;
+                            } else {
+                                $d_index[$k][$l][] = $j;
+                            }
+                        } else {
+                            if ($matrix_v[$k][$j] <= $matrix_v[$l][$j]) {
+                                $c_index[$k][$l][] = $j;
+                            } else {
+                                $d_index[$k][$l][] = $j;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $matrix_c = [];
+        $matrix_d = [];
+        $total_c = 0;
+        $total_d = 0;
+        $count_pairs = $m * ($m - 1);
+
+        for ($k = 0; $k < $m; $k++) {
+            for ($l = 0; $l < $m; $l++) {
+                if ($k != $l) {
+                    $sum_w = 0;
+                    foreach ($c_index[$k][$l] as $j) {
+                        $sum_w += $weights[$j];
+                    }
+                    $matrix_c[$k][$l] = $sum_w;
+                    $total_c += $sum_w;
+
+                    $max_d_num = 0;
+                    $max_d_den = 0;
+                    for ($j = 0; $j < $n; $j++) {
+                        $diff = abs($matrix_v[$k][$j] - $matrix_v[$l][$j]);
+                        if ($diff > $max_d_den) {
+                            $max_d_den = $diff;
+                        }
+                    }
+
+                    foreach ($d_index[$k][$l] as $j) {
+                        $diff = abs($matrix_v[$k][$j] - $matrix_v[$l][$j]);
+                        if ($diff > $max_d_num) {
+                            $max_d_num = $diff;
+                        }
+                    }
+
+                    $matrix_d[$k][$l] = $max_d_den == 0 ? 0 : ($max_d_num / $max_d_den);
+                    $total_d += $matrix_d[$k][$l];
+                } else {
+                    $matrix_c[$k][$l] = 0;
+                    $matrix_d[$k][$l] = 0;
+                }
+            }
+        }
+
+        $c_threshold = $count_pairs == 0 ? 0 : $total_c / $count_pairs;
+        $d_threshold = $count_pairs == 0 ? 0 : $total_d / $count_pairs;
+
+        $matrix_e = [];
+        for ($k = 0; $k < $m; $k++) {
+            for ($l = 0; $l < $m; $l++) {
+                if ($k != $l) {
+                    $f = $matrix_c[$k][$l] >= $c_threshold ? 1 : 0;
+                    $g = $matrix_d[$k][$l] <= $d_threshold ? 1 : 0;
+                    $matrix_e[$k][$l] = $f * $g;
+                } else {
+                    $matrix_e[$k][$l] = 0;
+                }
+            }
+        }
+
+        for ($k = 0; $k < $m; $k++) {
+            $sum_e = 0;
+            for ($l = 0; $l < $m; $l++) {
+                $sum_e += $matrix_e[$k][$l];
+            }
+            $alternatives[$k]['score'] = $sum_e;
+        }
+
+        usort($alternatives, function($a, $b) {
+            if ($b['score'] == $a['score']) {
+                return $b['c1'] <=> $a['c1'];
+            }
+            return $b['score'] <=> $a['score'];
+        });
+
+        return $alternatives;
     }
 }
