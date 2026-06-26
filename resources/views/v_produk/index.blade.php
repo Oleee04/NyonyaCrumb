@@ -282,21 +282,103 @@
         </div>
 
         <!-- BANNER INTERAKTIF SPK -->
-        <div class="spk-widget" style="margin-bottom: 50px;">
-            <!-- Banner Widget -->
-            <div class="spk-banner" id="spkBanner" style="background: linear-gradient(135deg, #8D6E63, #5D4037); color: #fff; padding: 24px 32px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-sm); transition: transform 0.3s; flex-wrap: wrap; gap: 15px;">
+        <div class="spk-widget" style="margin-bottom: 50px; background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden;">
+            <!-- Header Widget -->
+            <div class="spk-banner" id="spkBanner" style="background: linear-gradient(135deg, #8D6E63, #5D4037); color: #fff; padding: 24px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; align-items: center; gap: 18px; text-align: left;">
-                    <div style="font-size: 32px;"><i class="fa fa-info-circle"></i></div>
+                    <div style="font-size: 32px;"><i class="fa fa-cookie-bite"></i></div>
                     <div>
-                        <h4 style="font-size: 18px; margin: 0 0 4px; color: #fff; font-family: 'DM Sans', sans-serif; font-weight: 700;">Bingung Pilih Varian Cookies?</h4>
-                        <p style="font-size: 13px; margin: 0; opacity: 0.9;">Temukan cookies rekomendasi terbaik secara real-time dengan asisten cerdas kami!</p>
+                        <h4 style="font-size: 20px; margin: 0 0 4px; color: #fff; font-family: 'Cormorant Garamond', serif; font-weight: 700; letter-spacing: 0.5px;">Asisten Cerdas Nyonya Crumb</h4>
+                        <p style="font-size: 13.5px; margin: 0; opacity: 0.9;">Tentukan kriteria cookies impian Anda dan dapatkan rekomendasi terbaik secara real-time!</p>
                     </div>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <button type="button" id="btnResetQuiz" onclick="resetQuiz()" style="display: none; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 10px 18px; font-weight: 700; font-size: 12px; cursor: pointer; border-radius: 4px; height: 45px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.3s;" title="Reset Rekomendasi">
+            </div>
+
+            <!-- Form Body Preferensi -->
+            <div class="spk-form-body" style="padding: 30px; background: var(--bg-white);">
+                <div class="row g-3">
+                    <!-- Kolom 1: Kategori -->
+                    <div class="col-lg-3 col-md-6">
+                        <label style="font-weight: 700; font-size: 13px; color: var(--text-dark); margin-bottom: 12px; display: block; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <i class="fa fa-cookie" style="color: var(--primary); margin-right: 6px;"></i> Kategori
+                        </label>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <select id="selectKategori" style="width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: var(--radius-md); background: var(--bg-white); color: var(--text-dark); font-weight: 700; font-size: 13.5px; outline: none; cursor: pointer; transition: all 0.3s; height: 58px; box-sizing: border-box; font-family: 'DM Sans', sans-serif;">
+                                <option value="">Semua Kategori</option>
+                                @foreach($kategori as $kat)
+                                    <option value="{{ $kat->id }}">{{ $kat->nama_kategori }}</option>
+                                @endforeach
+                            </select>
+                            <div style="font-size: 11px; color: var(--text-muted); text-align: center; padding-top: 10px; line-height: 1.4;">
+                                Tampilkan semua rasa atau pilih kategori tertentu kesukaan Anda.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kolom 2: Popularitas -->
+                    <div class="col-lg-3 col-md-6">
+                        <label style="font-weight: 700; font-size: 13px; color: var(--text-dark); margin-bottom: 12px; display: block; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <i class="fa fa-fire" style="color: var(--primary); margin-right: 6px;"></i> Popularitas
+                        </label>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label class="choice-card checked-style" id="label-penjualan-bestseller" onclick="selectPreference('penjualan', 'bestseller')" style="padding: 12px 10px; margin: 0; min-height: 58px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box;">
+                                <input type="radio" name="penjualan" value="bestseller" checked style="display: none;">
+                                <div style="font-weight: 700; font-size: 13.5px; margin-bottom: 2px;">Terlaris (Bestseller)</div>
+                                <div style="font-size: 10.5px; color: var(--text-muted);">Sangat disukai banyak orang</div>
+                            </label>
+                            <label class="choice-card" id="label-penjualan-biasa" onclick="selectPreference('penjualan', 'biasa')" style="padding: 12px 10px; margin: 0; min-height: 58px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box;">
+                                <input type="radio" name="penjualan" value="biasa" style="display: none;">
+                                <div style="font-weight: 700; font-size: 13.5px; margin-bottom: 2px;">Koleksi Lainnya</div>
+                                <div style="font-size: 10.5px; color: var(--text-muted);">Cari varian rasa yang unik</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Kolom 3: Ukuran Cookies -->
+                    <div class="col-lg-3 col-md-6">
+                        <label style="font-weight: 700; font-size: 13px; color: var(--text-dark); margin-bottom: 12px; display: block; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <i class="fa fa-box-open" style="color: var(--primary); margin-right: 6px;"></i> Ukuran
+                        </label>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label class="choice-card checked-style" id="label-ukuran-besar" onclick="selectPreference('ukuran', 'besar')" style="padding: 12px 10px; margin: 0; min-height: 58px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box;">
+                                <input type="radio" name="ukuran" value="besar" checked style="display: none;">
+                                <div style="font-weight: 700; font-size: 13.5px; margin-bottom: 2px;">Porsi Besar (>50g)</div>
+                                <div style="font-size: 10.5px; color: var(--text-muted);">Satu gigitan besar yang puas</div>
+                            </label>
+                            <label class="choice-card" id="label-ukuran-mini" onclick="selectPreference('ukuran', 'mini')" style="padding: 12px 10px; margin: 0; min-height: 58px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box;">
+                                <input type="radio" name="ukuran" value="mini" style="display: none;">
+                                <div style="font-weight: 700; font-size: 13.5px; margin-bottom: 2px;">Porsi Mini (≤50g)</div>
+                                <div style="font-size: 10.5px; color: var(--text-muted);">Imut & pas untuk sekali makan</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Kolom 4: Kisaran Harga -->
+                    <div class="col-lg-3 col-md-6">
+                        <label style="font-weight: 700; font-size: 13px; color: var(--text-dark); margin-bottom: 12px; display: block; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <i class="fa fa-tags" style="color: var(--primary); margin-right: 6px;"></i> Kisaran Harga
+                        </label>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <label class="choice-card checked-style" id="label-harga-terendah" onclick="selectPreference('harga', 'terendah')" style="padding: 12px 10px; margin: 0; min-height: 58px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box;">
+                                <input type="radio" name="harga" value="terendah" checked style="display: none;">
+                                <div style="font-weight: 700; font-size: 13.5px; margin-bottom: 2px;">Harga Bersahabat</div>
+                                <div style="font-size: 10.5px; color: var(--text-muted);">Lebih hemat & terjangkau</div>
+                            </label>
+                            <label class="choice-card" id="label-harga-tertinggi" onclick="selectPreference('harga', 'tertinggi')" style="padding: 12px 10px; margin: 0; min-height: 58px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box;">
+                                <input type="radio" name="harga" value="tertinggi" style="display: none;">
+                                <div style="font-weight: 700; font-size: 13.5px; margin-bottom: 2px;">Rasa Premium</div>
+                                <div style="font-size: 10.5px; color: var(--text-muted);">Bahan eksklusif rasa mewah</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
+                    <button type="button" id="btnResetQuiz" onclick="resetQuiz()" style="display: none; background: #e0e0e0; border: 1px solid #ccc; color: #333; padding: 10px 24px; font-weight: 700; font-size: 12px; cursor: pointer; border-radius: 4px; height: 45px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s;" title="Reset Rekomendasi">
                         <i class="fa fa-sync"></i> Reset
                     </button>
-                    <button type="button" onclick="submitQuiz()" style="background: var(--primary); border: 1px solid rgba(255,255,255,0.4); color: #fff; padding: 12px 24px; font-weight: 700; font-size: 12px; cursor: pointer; border-radius: 4px; height: 45px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow-sm); text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s;">
+                    <button type="button" onclick="submitQuiz()" style="background: var(--primary); border: 1px solid rgba(0,0,0,0.1); color: #fff; padding: 12px 32px; font-weight: 700; font-size: 12px; cursor: pointer; border-radius: 4px; height: 45px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: var(--shadow-sm); text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s;">
                         Analisis Rekomendasi <i class="fa fa-chevron-right"></i>
                     </button>
                 </div>
@@ -420,7 +502,32 @@
         }
     }
 
+    function selectPreference(kriteria, value) {
+        // Cari element input radio dan set checked
+        const input = document.querySelector(`input[name="${kriteria}"][value="${value}"]`);
+        if (input) {
+            input.checked = true;
+        }
+        
+        // Hapus class checked-style dari card kriteria yang sama
+        const cards = document.querySelectorAll(`[id^="label-${kriteria}-"]`);
+        cards.forEach(card => card.classList.remove('checked-style'));
+        
+        // Tambahkan class checked-style ke card yang dipilih
+        const selectedCard = document.getElementById(`label-${kriteria}-${value}`);
+        if (selectedCard) {
+            selectedCard.classList.add('checked-style');
+        }
+    }
+
     function resetQuiz() {
+        // Reset pilihan form ke default
+        document.getElementById('selectKategori').value = "";
+        
+        selectPreference('penjualan', 'bestseller');
+        selectPreference('ukuran', 'besar');
+        selectPreference('harga', 'terendah');
+
         document.getElementById('spkResultsContainer').style.display = 'none';
         document.getElementById('spkResultsContainer').innerHTML = '';
         document.getElementById('spkPlaceholder').style.display = 'block';
@@ -429,23 +536,15 @@
         updateResetButtonVisibility();
     }
 
-    function toggleGapDetails(id) {
-        const detailsDiv = document.getElementById('gap-details-' + id);
-        const chevron = document.getElementById('gap-chevron-' + id);
-        if (detailsDiv.style.display === 'none') {
-            detailsDiv.style.display = 'block';
-            chevron.classList.remove('fa-chevron-down');
-            chevron.classList.add('fa-chevron-up');
-        } else {
-            detailsDiv.style.display = 'none';
-            chevron.classList.remove('fa-chevron-up');
-            chevron.classList.add('fa-chevron-down');
-        }
-    }
-
     async function submitQuiz() {
-        // Show loading overlay
+        // Tampilkan loading overlay
         document.getElementById('loadingOverlay').style.display = 'flex';
+
+        // Dapatkan semua nilai preferensi terpilih
+        const kategori_id = document.getElementById('selectKategori').value;
+        const penjualan = document.querySelector('input[name="penjualan"]:checked')?.value || 'bestseller';
+        const ukuran = document.querySelector('input[name="ukuran"]:checked')?.value || 'besar';
+        const harga = document.querySelector('input[name="harga"]:checked')?.value || 'terendah';
 
         try {
             const response = await fetch("{{ route('produk.rekomendasi') }}", {
@@ -455,16 +554,21 @@
                     "Accept": "application/json",
                     "X-CSRF-TOKEN": window.csrfToken
                 },
-                body: JSON.stringify({})
+                body: JSON.stringify({
+                    kategori_id: kategori_id,
+                    penjualan: penjualan,
+                    ukuran: ukuran,
+                    harga: harga
+                })
             });
 
             const result = await response.json();
             
-            // Hide loading overlay
+            // Sembunyikan loading overlay
             document.getElementById('loadingOverlay').style.display = 'none';
 
             if (result.success && result.data.length > 0) {
-                // Hide default list & placeholder
+                // Sembunyikan daftar default & placeholder
                 document.getElementById('spkPlaceholder').style.display = 'none';
                 document.getElementById('defaultProductsContainer').style.display = 'none';
                 
@@ -568,61 +672,6 @@
                                             Detail
                                         </a>
                                     </div>
-
-                                    <!-- Collapsible GAP Detail -->
-                                    <div class="gap-detail-header" onclick="toggleGapDetails(${bestMatch.produk_id})" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--border); margin-top: 18px; font-size: 13px; font-weight: 600; color: var(--primary);">
-                                        <span>Lihat Detail Perhitungan GAP</span>
-                                        <i class="fa fa-chevron-down" id="gap-chevron-${bestMatch.produk_id}"></i>
-                                    </div>
-                                    <div id="gap-details-${bestMatch.produk_id}" style="display: none; padding-top: 12px;">
-                                        <table class="table table-sm table-borderless" style="font-size: 12px; margin-bottom: 0; width: 100%;">
-                                            <thead>
-                                                <tr style="border-bottom: 1px solid var(--border); font-weight: bold; color: var(--text-dark);">
-                                                    <th style="padding: 6px 0;">Kriteria</th>
-                                                    <th class="text-center" style="padding: 6px 0;">Profil Produk</th>
-                                                    <th class="text-center" style="padding: 6px 0;">Profil Ideal</th>
-                                                    <th class="text-center" style="padding: 6px 0;">GAP</th>
-                                                    <th class="text-center" style="padding: 6px 0;">Bobot</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td style="padding: 6px 0;">C1: Jumlah Penjualan (Core)</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c1.profil}</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c1.ideal}</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c1.gap}</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c1.bobot}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="padding: 6px 0;">C2: Ukuran (Core)</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c2.profil}</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c2.ideal}</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c2.gap}</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c2.bobot}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="padding: 6px 0;">C3: Harga (Secondary)</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c3.profil}</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c3.ideal}</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c3.gap}</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.details.c3.bobot}</td>
-                                                </tr>
-                                                <tr style="border-top: 1px solid var(--border); font-weight: bold;">
-                                                    <td colspan="4" style="padding: 6px 0;">Core Factor (NCF)</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${parseFloat(bestMatch.ncf).toFixed(2)}</td>
-                                                </tr>
-                                                <tr style="font-weight: bold;">
-                                                    <td colspan="4" style="padding: 6px 0;">Secondary Factor (NSF)</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${parseFloat(bestMatch.nsf).toFixed(2)}</td>
-                                                </tr>
-                                                <tr style="border-top: 2px solid var(--primary); font-weight: bold; color: var(--primary);">
-                                                    <td colspan="4" style="padding: 6px 0;">Nilai Total (70% NCF + 30% NSF)</td>
-                                                    <td class="text-center" style="padding: 6px 0;">${bestMatch.nilai_akhir}</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-
                                 </div>
                             </div>
                         </div>
@@ -728,42 +777,6 @@
                                                     Detail
                                                 </a>
                                             </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Collapsible GAP Detail inside alternative card -->
-                                    <div style="padding: 10px 20px; border-top: 1px solid var(--border); background: var(--bg-creme);">
-                                        <div onclick="toggleGapDetails(${alt.produk_id})" style="cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 700; color: var(--primary);">
-                                            <span>Detail GAP</span>
-                                            <i class="fa fa-chevron-down" id="gap-chevron-${alt.produk_id}"></i>
-                                        </div>
-                                        <div id="gap-details-${alt.produk_id}" style="display: none; padding-top: 8px;">
-                                            <table style="width: 100%; font-size: 10.5px; border-collapse: collapse;">
-                                                <tr style="border-bottom: 1px solid var(--border); font-weight: bold;">
-                                                    <td style="padding: 4px 0;">Kriteria</td>
-                                                    <td class="text-center" style="padding: 4px 0;">GAP</td>
-                                                    <td class="text-right" style="padding: 4px 0;">Bobot</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="padding: 4px 0;">C1: Penjualan</td>
-                                                    <td class="text-center" style="padding: 4px 0;">${alt.details.c1.gap}</td>
-                                                    <td class="text-right" style="padding: 4px 0;">${alt.details.c1.bobot}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="padding: 4px 0;">C2: Ukuran</td>
-                                                    <td class="text-center" style="padding: 4px 0;">${alt.details.c2.gap}</td>
-                                                    <td class="text-right" style="padding: 4px 0;">${alt.details.c2.bobot}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="padding: 4px 0;">C3: Harga</td>
-                                                    <td class="text-center" style="padding: 4px 0;">${alt.details.c3.gap}</td>
-                                                    <td class="text-right" style="padding: 4px 0;">${alt.details.c3.bobot}</td>
-                                                </tr>
-                                                <tr style="border-top: 1px solid var(--border); font-weight: bold; color: var(--text-dark);">
-                                                    <td colspan="2" style="padding: 4px 0;">Nilai Total</td>
-                                                    <td class="text-right" style="padding: 4px 0;">${alt.nilai_akhir}</td>
-                                                </tr>
-                                            </table>
                                         </div>
                                     </div>
                                 </div>

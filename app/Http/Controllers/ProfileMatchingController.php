@@ -13,18 +13,24 @@ class ProfileMatchingController extends Controller
      */
     public function analyze(Request $request)
     {
-        // Menggunakan profil ideal tetap di backend: Banyak Terjual, Ukuran Besar, Harga Terendah
-        $preferensi_penjualan = 'bestseller';
-        $preferensi_ukuran    = 'besar';
-        $preferensi_harga     = 'terendah';
+        $preferensi_penjualan = $request->input('penjualan', 'bestseller');
+        $preferensi_ukuran    = $request->input('ukuran', 'besar');
+        $preferensi_harga     = $request->input('harga', 'terendah');
+        $kategori_id          = $request->input('kategori_id');
 
-        // Mengambil seluruh data produk aktif secara real-time langsung dari database
-        $produks = Produk::where('status', 1)->with('fotoProduk', 'kategori')->get();
+        // Mengambil data produk aktif secara real-time langsung dari database
+        $query = Produk::where('status', 1);
+
+        if (!empty($kategori_id)) {
+            $query->where('kategori_id', $kategori_id);
+        }
+
+        $produks = $query->with('fotoProduk', 'kategori')->get();
 
         if ($produks->isEmpty()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Tidak ada produk aktif.',
+                'message' => 'Tidak ada produk aktif untuk kategori atau kriteria yang dipilih.',
                 'data'    => []
             ]);
         }
